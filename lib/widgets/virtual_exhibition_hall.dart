@@ -931,6 +931,8 @@ class _VirtualExhibitionHallState extends State<VirtualExhibitionHall>
     final List<Widget> widgets = [];
     final int count = artworks.length;
 
+    final double maxAngle = isCompact ? 1.25 : 1.55;
+
     for (int i = 0; i < count; i++) {
       final artwork = artworks[i];
       final double baseAngle = (i * 2 * math.pi) / count;
@@ -943,19 +945,19 @@ class _VirtualExhibitionHallState extends State<VirtualExhibitionHall>
         diffAngle += 2 * math.pi;
       }
 
-      if (diffAngle.abs() < 1.55) {
+      if (diffAngle.abs() < maxAngle) {
         final double screenX =
-            centerX + diffAngle * (isCompact ? width * 0.88 : width * 0.68) * _zoomDistance;
+            centerX + diffAngle * (isCompact ? width * 1.15 : width * 0.68) * _zoomDistance;
         final double depthFactor = math.cos(diffAngle);
         final double scale = (isCompact ? (0.70 + 0.30 * depthFactor) : (0.76 + 0.32 * depthFactor)) * _zoomDistance;
-        final double opacity = (1.0 - (diffAngle.abs() / 1.55)).clamp(0.0, 1.0);
+        final double opacity = (1.0 - (diffAngle.abs() / maxAngle)).clamp(0.0, 1.0);
         final double lightIntensity =
-            (1.0 - (diffAngle.abs() / 1.55)).clamp(0.35, 1.0);
+            (1.0 - (diffAngle.abs() / maxAngle)).clamp(0.35, 1.0);
 
-        final double baseCardW = width > 700 ? 255.0 : (isCompact ? 138.0 : 196.0);
+        final double baseCardW = width > 700 ? 255.0 : (isCompact ? 124.0 : 196.0);
         final double cardW = baseCardW * scale;
         final double cardH = cardW * 1.24;
-        final double lightW = math.max(isCompact ? 90.0 : 116.0, cardW * 0.86);
+        final double lightW = math.max(isCompact ? 76.0 : 116.0, cardW * 0.82);
         final double fixtureH = (isCompact ? 22.0 : 26.0) * scale;
         const double gapAboveFrame = 6.0;
 
