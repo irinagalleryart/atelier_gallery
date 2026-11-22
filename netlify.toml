@@ -8,6 +8,13 @@
     fi
     export PATH="$FLUTTER_DIR/bin:$PATH"
     flutter config --no-analytics
+
+    mkdir -p assets/config
+    if [ ! -f "assets/config/config.yaml" ]; then
+      printf "supabase_url: \"%s\"\nsupabase_anon_key: \"%s\"\n" \
+        "${SUPABASE_URL:-}" "${SUPABASE_ANON_KEY:-}" > assets/config/config.yaml
+    fi
+
     flutter pub get
     flutter build web --release
   """
