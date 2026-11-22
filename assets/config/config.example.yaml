@@ -1,0 +1,4 @@
+# Supabase Configuration Example
+# Copy this file to config.yaml and fill in your actual Supabase project credentials.
+supabase_url: "https://your-supabase-project.supabase.co"
+supabase_anon_key: "your-supabase-anon-key"
