@@ -578,7 +578,7 @@ class _VirtualExhibitionHallState extends State<VirtualExhibitionHall>
 
               // 4. Bottom Floating Glass Controls Bar (Single row on compact screens)
               Positioned(
-                bottom: _selectedArtwork != null ? 100 : 20,
+                bottom: _selectedArtwork != null ? 124 : 32,
                 left: isCompact ? 8 : 16,
                 right: isCompact ? 8 : 16,
                 child: Center(
@@ -834,7 +834,7 @@ class _VirtualExhibitionHallState extends State<VirtualExhibitionHall>
               // 5. Selected Artwork Floating Card
               if (_selectedArtwork != null)
                 Positioned(
-                  bottom: 16,
+                  bottom: 24,
                   left: isCompact ? 12 : (size.width - 480) / 2,
                   right: isCompact ? 12 : null,
                   child: widget.dataController != null

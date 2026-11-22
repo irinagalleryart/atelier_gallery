@@ -458,8 +458,8 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
     return Dialog(
       backgroundColor: const Color(0xFFFAF9F6),
       insetPadding: EdgeInsets.symmetric(
-        horizontal: isCompact ? 12 : 24,
-        vertical: isCompact ? 16 : 24,
+        horizontal: isCompact ? 16 : 24,
+        vertical: isCompact ? 24 : 24,
       ),
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
       child: Container(
@@ -484,7 +484,7 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                               children: [
                                 _buildArtworkInfoBar(l10n, localeCode),
                                 const SizedBox(height: 12),
-                                _buildControlsRow(l10n),
+                                _buildControlsRow(l10n, isCompact),
                                 const SizedBox(height: 14),
                                 _buildPuzzleBoardArea(
                                   boardSize: boardSize,
@@ -505,7 +505,7 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                                   flex: 6,
                                   child: Column(
                                     children: [
-                                      _buildControlsRow(l10n),
+                                      _buildControlsRow(l10n, isCompact),
                                       const SizedBox(height: 14),
                                       _buildPuzzleBoardArea(
                                         boardSize: boardSize,
@@ -905,7 +905,91 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
     );
   }
 
-  Widget _buildControlsRow(AppLocalizations l10n) {
+  Widget _buildControlsRow(AppLocalizations l10n, bool isCompact) {
+    if (isCompact) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 8),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.black.withValues(alpha: 0.06)),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFFF5F3EF),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              padding: const EdgeInsets.all(2),
+              child: SingleChildScrollView(
+                scrollDirection: Axis.horizontal,
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _buildGridOptionButton(
+                      gridSize: 3,
+                      label: l10n.easy3x3,
+                    ),
+                    _buildGridOptionButton(
+                      gridSize: 4,
+                      label: l10n.medium4x4,
+                    ),
+                    _buildGridOptionButton(
+                      gridSize: 5,
+                      label: l10n.hard5x5,
+                    ),
+                  ],
+                ),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Row(
+                  children: [
+                    const Icon(Icons.touch_app_outlined,
+                        size: 14, color: Color(0xFF7B5E4B)),
+                    const SizedBox(width: 4),
+                    Text(
+                      '${l10n.movesLabel}: ',
+                      style: TextStyle(fontSize: 11, color: Colors.grey.shade600),
+                    ),
+                    Text(
+                      '$_moves',
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        color: Color(0xFF1F1F1F),
+                      ),
+                    ),
+                  ],
+                ),
+                Row(
+                  children: [
+                    const Icon(Icons.timer_outlined,
+                        size: 14, color: Color(0xFF7B5E4B)),
+                    const SizedBox(width: 4),
+                    Text(
+                      _formatTime(_secondsElapsed),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        fontFeatures: [FontFeature.tabularFigures()],
+                        color: Color(0xFF1F1F1F),
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
