@@ -15,7 +15,7 @@ class WatercolorBackground extends StatelessWidget {
   Widget build(BuildContext context) {
     final isDark = Theme.of(context).brightness == Brightness.dark;
     final backgroundColor =
-        isDark ? const Color(0xFF141414) : const Color(0xFFFAF9F6);
+        isDark ? const Color(0xFF13161C) : const Color(0xFFFAF9F6);
 
     return Container(
       color: backgroundColor,
@@ -55,7 +55,7 @@ class _WatercolorBrushPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     if (size.width <= 0 || size.height <= 0) return;
 
-    final alphaBoost = isDark ? 0.38 : 1.0;
+    final alphaBoost = isDark ? 0.18 : 1.0;
     final centerX = size.width * 0.5;
     final heroY = math.min(size.height * 0.29, 285.0);
     final heroSpan = math.min(size.width * 0.42, 490.0);
@@ -273,7 +273,7 @@ class _WatercolorBrushPainter extends CustomPainter {
     final rng = math.Random(777);
 
     // 1. Soft watercolor droplets scattered across the whole canvas
-    const int dropCount = 130;
+    final int dropCount = isDark ? 35 : 130;
     for (int i = 0; i < dropCount; i++) {
       final x = rng.nextDouble() * size.width;
       final y = rng.nextDouble() * size.height;
@@ -316,7 +316,7 @@ class _WatercolorBrushPainter extends CustomPainter {
     }
 
     // 2. Soft watercolor smears / trails (like a wet drop with a blurred tail)
-    const int trailCount = 26;
+    final int trailCount = isDark ? 6 : 26;
     for (int i = 0; i < trailCount; i++) {
       final startX = rng.nextDouble() * size.width;
       final startY = rng.nextDouble() * size.height;
