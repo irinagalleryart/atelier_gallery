@@ -278,18 +278,27 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
         return StatefulBuilder(
           builder: (context, setDialogState) {
             final l10n = AppLocalizations.of(context)!;
+            final theme = Theme.of(context);
+            final isDark = theme.brightness == Brightness.dark;
             return AlertDialog(
-              backgroundColor: const Color(0xFFFAF9F6),
+              backgroundColor: isDark ? theme.colorScheme.surface : const Color(0xFFFAF9F6),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               title: Row(
                 children: [
-                  const Icon(Icons.account_circle_outlined, color: Color(0xFF7B5E4B)),
+                  Icon(
+                    Icons.account_circle_outlined,
+                    color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
+                  ),
                   const SizedBox(width: 8),
                   Text(
                     _nickname == null || _nickname!.isEmpty
                         ? l10n.enterNickname
                         : l10n.changeNickname,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: isDark ? Colors.white : null,
+                    ),
                   ),
                 ],
               ),
@@ -446,6 +455,8 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final localeCode = Localizations.localeOf(context).languageCode;
     final size = MediaQuery.of(context).size;
     final isCompact = size.width < 600;
@@ -456,7 +467,7 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
     final tileHeight = boardSize / _gridSize;
 
     return Dialog(
-      backgroundColor: const Color(0xFFFAF9F6),
+      backgroundColor: isDark ? theme.colorScheme.surface : const Color(0xFFFAF9F6),
       insetPadding: EdgeInsets.symmetric(
         horizontal: isCompact ? 16 : 24,
         vertical: isCompact ? 24 : 24,
@@ -553,6 +564,8 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
   ) {
     final width = MediaQuery.of(context).size.width;
     final isMedium = width < 900;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     if (isCompact) {
       return Column(
@@ -563,12 +576,12 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF7B5E4B).withValues(alpha: 0.1),
+                  color: isDark ? theme.colorScheme.primaryContainer : const Color(0xFF7B5E4B).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(8),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.extension_outlined,
-                  color: Color(0xFF7B5E4B),
+                  color: isDark ? theme.colorScheme.onPrimaryContainer : const Color(0xFF7B5E4B),
                   size: 16,
                 ),
               ),
@@ -577,10 +590,10 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                 child: Text(
                   l10n.artPuzzle,
                   overflow: TextOverflow.ellipsis,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF1F1F1F),
+                    color: isDark ? Colors.white : const Color(0xFF1F1F1F),
                   ),
                 ),
               ),
@@ -623,12 +636,12 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
               Container(
                 padding: const EdgeInsets.all(7),
                 decoration: BoxDecoration(
-                  color: const Color(0xFF7B5E4B).withValues(alpha: 0.1),
+                  color: isDark ? theme.colorScheme.primaryContainer : const Color(0xFF7B5E4B).withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(10),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.extension_outlined,
-                  color: Color(0xFF7B5E4B),
+                  color: isDark ? theme.colorScheme.onPrimaryContainer : const Color(0xFF7B5E4B),
                   size: 18,
                 ),
               ),
@@ -641,10 +654,10 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                     Text(
                       l10n.artPuzzle,
                       overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFF1F1F1F),
+                        color: isDark ? Colors.white : const Color(0xFF1F1F1F),
                       ),
                     ),
                     if (!isCompact && !isMedium)
@@ -653,7 +666,7 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
                           fontSize: 10,
-                          color: Colors.grey.shade600,
+                          color: isDark ? Colors.white60 : Colors.grey.shade600,
                         ),
                       ),
                   ],
@@ -702,10 +715,12 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
   ) {
     final showGameLabel = !isCompact && (!isMedium || _currentTab == PuzzleDialogTab.game);
     final showLeaderboardLabel = !isCompact && (!isMedium || _currentTab == PuzzleDialogTab.leaderboard);
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F3EF),
+        color: isDark ? theme.colorScheme.surfaceContainerHigh : const Color(0xFFF5F3EF),
         borderRadius: BorderRadius.circular(20),
       ),
       padding: const EdgeInsets.all(2),
@@ -722,7 +737,7 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
               ),
               decoration: BoxDecoration(
                 color: _currentTab == PuzzleDialogTab.game
-                    ? Colors.white
+                    ? (isDark ? theme.colorScheme.surfaceContainerHighest : Colors.white)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(18),
                 boxShadow: _currentTab == PuzzleDialogTab.game
@@ -741,8 +756,8 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                     Icons.extension_outlined,
                     size: 14,
                     color: _currentTab == PuzzleDialogTab.game
-                        ? const Color(0xFF7B5E4B)
-                        : Colors.grey.shade600,
+                        ? (isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B))
+                        : (isDark ? Colors.white60 : Colors.grey.shade600),
                   ),
                   if (showGameLabel) ...[
                     const SizedBox(width: 4),
@@ -754,8 +769,8 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                             ? FontWeight.bold
                             : FontWeight.normal,
                         color: _currentTab == PuzzleDialogTab.game
-                            ? const Color(0xFF7B5E4B)
-                            : Colors.grey.shade700,
+                            ? (isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B))
+                            : (isDark ? Colors.white70 : Colors.grey.shade700),
                       ),
                     ),
                   ],
@@ -773,7 +788,7 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
               ),
               decoration: BoxDecoration(
                 color: _currentTab == PuzzleDialogTab.leaderboard
-                    ? Colors.white
+                    ? (isDark ? theme.colorScheme.surfaceContainerHighest : Colors.white)
                     : Colors.transparent,
                 borderRadius: BorderRadius.circular(18),
                 boxShadow: _currentTab == PuzzleDialogTab.leaderboard
@@ -824,6 +839,9 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
     bool isCompact,
     bool isMedium,
   ) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return InkWell(
       onTap: () async {
         final newNick = await _showNicknameInputDialog();
@@ -837,9 +855,9 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 5),
         decoration: BoxDecoration(
-          color: const Color(0xFF7B5E4B).withValues(alpha: 0.08),
+          color: isDark ? theme.colorScheme.surfaceContainerHigh : const Color(0xFF7B5E4B).withValues(alpha: 0.08),
           border: Border.all(
-            color: const Color(0xFF7B5E4B).withValues(alpha: 0.3),
+            color: isDark ? theme.colorScheme.outlineVariant : const Color(0xFF7B5E4B).withValues(alpha: 0.3),
           ),
           borderRadius: BorderRadius.circular(20),
         ),
@@ -847,10 +865,10 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.account_circle_outlined,
               size: 14,
-              color: Color(0xFF7B5E4B),
+              color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
             ),
             const SizedBox(width: 4),
             Flexible(
@@ -860,15 +878,15 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                     : l10n.nickname,
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFF7B5E4B),
+                  color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
                 ),
               ),
             ),
             const SizedBox(width: 2),
-            const Icon(Icons.edit, size: 11, color: Color(0xFF7B5E4B)),
+            Icon(Icons.edit, size: 11, color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B)),
           ],
         ),
       ),
@@ -881,6 +899,9 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
     bool isCompact,
     bool isMedium,
   ) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return PopupMenuButton<ArtworkModel>(
       tooltip: l10n.chooseArtwork,
       initialValue: _selectedArtwork,
@@ -917,7 +938,9 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontWeight: isCurrent ? FontWeight.bold : FontWeight.normal,
-                    color: isCurrent ? const Color(0xFF7B5E4B) : Colors.black87,
+                    color: isCurrent
+                        ? (isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B))
+                        : (isDark ? Colors.white : Colors.black87),
                   ),
                 ),
               ),
@@ -931,18 +954,20 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
           vertical: 5,
         ),
         decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: Colors.grey.shade300),
+          color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white,
+          border: Border.all(
+            color: isDark ? theme.colorScheme.outlineVariant : Colors.grey.shade300,
+          ),
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(
+            Icon(
               Icons.collections_outlined,
               size: 14,
-              color: Color(0xFF7B5E4B),
+              color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
             ),
             const SizedBox(width: 4),
             Flexible(
@@ -950,15 +975,15 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                 _selectedArtwork.localizedTitle(localeCode),
                 overflow: TextOverflow.ellipsis,
                 maxLines: 1,
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.w500,
-                  color: Color(0xFF1F1F1F),
+                  color: isDark ? Colors.white : const Color(0xFF1F1F1F),
                 ),
               ),
             ),
             const SizedBox(width: 2),
-            const Icon(Icons.arrow_drop_down, size: 16, color: Colors.grey),
+            Icon(Icons.arrow_drop_down, size: 16, color: isDark ? Colors.white60 : Colors.grey),
           ],
         ),
       ),
@@ -966,6 +991,9 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
   }
 
   Widget _buildControlsRow(AppLocalizations l10n) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return LayoutBuilder(
       builder: (context, constraints) {
         final isNarrow = constraints.maxWidth < 430;
@@ -974,16 +1002,18 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
           return Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
             decoration: BoxDecoration(
-              color: Colors.white,
+              color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white,
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: Colors.black.withValues(alpha: 0.06)),
+              border: Border.all(
+                color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.06),
+              ),
             ),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
                 Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF5F3EF),
+                    color: isDark ? theme.colorScheme.surfaceContainer : const Color(0xFFF5F3EF),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   padding: const EdgeInsets.all(2),
@@ -1015,23 +1045,29 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                     Flexible(
                       child: Row(
                         children: [
-                          const Icon(Icons.touch_app_outlined,
-                              size: 14, color: Color(0xFF7B5E4B)),
+                          Icon(
+                            Icons.touch_app_outlined,
+                            size: 14,
+                            color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
+                          ),
                           const SizedBox(width: 3),
                           Flexible(
                             child: Text(
                               '${l10n.movesLabel}: ',
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: TextStyle(fontSize: 10.5, color: Colors.grey.shade600),
+                              style: TextStyle(
+                                fontSize: 10.5,
+                                color: isDark ? const Color(0xFFCBD5E1) : Colors.grey.shade600,
+                              ),
                             ),
                           ),
                           Text(
                             '$_moves',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 11.5,
                               fontWeight: FontWeight.bold,
-                              color: Color(0xFF1F1F1F),
+                              color: isDark ? const Color(0xFFF8FAFC) : const Color(0xFF1F1F1F),
                             ),
                           ),
                         ],
@@ -1042,19 +1078,22 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.end,
                         children: [
-                          const Icon(Icons.timer_outlined,
-                              size: 14, color: Color(0xFF7B5E4B)),
+                          Icon(
+                            Icons.timer_outlined,
+                            size: 14,
+                            color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
+                          ),
                           const SizedBox(width: 3),
                           Flexible(
                             child: Text(
                               _formatTime(_secondsElapsed),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontSize: 11.5,
                                 fontWeight: FontWeight.bold,
-                                fontFeatures: [FontFeature.tabularFigures()],
-                                color: Color(0xFF1F1F1F),
+                                fontFeatures: const [FontFeature.tabularFigures()],
+                                color: isDark ? const Color(0xFFF8FAFC) : const Color(0xFF1F1F1F),
                               ),
                             ),
                           ),
@@ -1071,9 +1110,11 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
         return Container(
           padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.black.withValues(alpha: 0.06)),
+            border: Border.all(
+              color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.06),
+            ),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -1081,7 +1122,7 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
               // Difficulty / Grid Size Switcher
               Container(
                 decoration: BoxDecoration(
-                  color: const Color(0xFFF5F3EF),
+                  color: isDark ? theme.colorScheme.surfaceContainer : const Color(0xFFF5F3EF),
                   borderRadius: BorderRadius.circular(8),
                 ),
                 padding: const EdgeInsets.all(2),
@@ -1112,19 +1153,25 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                 children: [
                   Row(
                     children: [
-                      const Icon(Icons.touch_app_outlined,
-                          size: 15, color: Color(0xFF7B5E4B)),
+                      Icon(
+                        Icons.touch_app_outlined,
+                        size: 15,
+                        color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         '${l10n.movesLabel}: ',
-                        style: TextStyle(fontSize: 12, color: Colors.grey.shade600),
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: isDark ? const Color(0xFFCBD5E1) : Colors.grey.shade600,
+                        ),
                       ),
                       Text(
                         '$_moves',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF1F1F1F),
+                          color: isDark ? const Color(0xFFF8FAFC) : const Color(0xFF1F1F1F),
                         ),
                       ),
                     ],
@@ -1132,16 +1179,19 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                   const SizedBox(width: 14),
                   Row(
                     children: [
-                      const Icon(Icons.timer_outlined,
-                          size: 15, color: Color(0xFF7B5E4B)),
+                      Icon(
+                        Icons.timer_outlined,
+                        size: 15,
+                        color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
+                      ),
                       const SizedBox(width: 4),
                       Text(
                         _formatTime(_secondsElapsed),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.bold,
-                          fontFeatures: [FontFeature.tabularFigures()],
-                          color: Color(0xFF1F1F1F),
+                          fontFeatures: const [FontFeature.tabularFigures()],
+                          color: isDark ? const Color(0xFFF8FAFC) : const Color(0xFF1F1F1F),
                         ),
                       ),
                     ],
@@ -1159,7 +1209,10 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
     required int gridSize,
     required String label,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final isSelected = _gridSize == gridSize;
+
     return InkWell(
       onTap: () {
         if (_gridSize != gridSize) {
@@ -1173,7 +1226,9 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
-          color: isSelected ? Colors.white : Colors.transparent,
+          color: isSelected
+              ? (isDark ? theme.colorScheme.surfaceContainerHighest : Colors.white)
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(6),
           boxShadow: isSelected
               ? [
@@ -1189,7 +1244,9 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
           style: TextStyle(
             fontSize: 11,
             fontWeight: isSelected ? FontWeight.w600 : FontWeight.normal,
-            color: isSelected ? const Color(0xFF7B5E4B) : Colors.grey.shade700,
+            color: isSelected
+                ? (isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B))
+                : (isDark ? Colors.white70 : Colors.grey.shade700),
           ),
         ),
       ),
@@ -1203,17 +1260,20 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
     required AppLocalizations l10n,
     required String localeCode,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Center(
       child: Container(
         width: boardSize,
         height: boardSize,
         decoration: BoxDecoration(
-          color: const Color(0xFFEFECE6),
+          color: isDark ? theme.colorScheme.surfaceContainerHigh : const Color(0xFFEFECE6),
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
             color: _isSolved
                 ? const Color(0xFFD4AF37)
-                : Colors.black.withValues(alpha: 0.12),
+                : (isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.12)),
             width: _isSolved ? 2.5 : 1.5,
           ),
           boxShadow: [
@@ -1297,7 +1357,7 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(16),
                         ),
-                        color: const Color(0xFFFAF9F6),
+                        color: isDark ? theme.colorScheme.surfaceContainerHigh : const Color(0xFFFAF9F6),
                         child: Padding(
                           padding: const EdgeInsets.all(20.0),
                           child: SingleChildScrollView(
@@ -1313,10 +1373,10 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                                 Text(
                                   l10n.puzzleCompleted,
                                   textAlign: TextAlign.center,
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 18,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xFF1F1F1F),
+                                    color: isDark ? Colors.white : const Color(0xFF1F1F1F),
                                   ),
                                 ),
                                 const SizedBox(height: 6),
@@ -1606,6 +1666,9 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
   }
 
   Widget _buildFooterControls(AppLocalizations l10n, bool isCompact) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
@@ -1629,6 +1692,7 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                 overflow: TextOverflow.ellipsis,
                 style: TextStyle(
                   fontSize: isCompact ? 11 : 13,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
               style: OutlinedButton.styleFrom(
@@ -1636,13 +1700,19 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                   horizontal: isCompact ? 6 : 12,
                   vertical: isCompact ? 8 : 10,
                 ),
+                backgroundColor: _isPreviewing
+                    ? (isDark
+                        ? theme.colorScheme.primaryContainer.withValues(alpha: 0.5)
+                        : const Color(0xFF7B5E4B).withValues(alpha: 0.12))
+                    : (isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white),
                 foregroundColor: _isPreviewing
-                    ? const Color(0xFF7B5E4B)
-                    : Colors.grey.shade800,
+                    ? (isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B))
+                    : (isDark ? const Color(0xFFF8FAFC) : const Color(0xFF1F1F1F)),
                 side: BorderSide(
                   color: _isPreviewing
-                      ? const Color(0xFF7B5E4B)
-                      : Colors.grey.shade400,
+                      ? (isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B))
+                      : (isDark ? theme.colorScheme.outlineVariant : Colors.grey.shade400),
+                  width: isDark ? 1.2 : 1.0,
                 ),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(20),
@@ -1665,6 +1735,7 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
                 fontSize: isCompact ? 11 : 13,
+                fontWeight: FontWeight.w600,
               ),
             ),
             style: OutlinedButton.styleFrom(
@@ -1672,8 +1743,12 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                 horizontal: isCompact ? 6 : 12,
                 vertical: isCompact ? 8 : 10,
               ),
-              foregroundColor: const Color(0xFF1F1F1F),
-              side: BorderSide(color: Colors.grey.shade400),
+              backgroundColor: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white,
+              foregroundColor: isDark ? const Color(0xFFF8FAFC) : const Color(0xFF1F1F1F),
+              side: BorderSide(
+                color: isDark ? theme.colorScheme.outlineVariant : Colors.grey.shade400,
+                width: isDark ? 1.2 : 1.0,
+              ),
               shape: RoundedRectangleBorder(
                 borderRadius: BorderRadius.circular(20),
               ),
@@ -1685,12 +1760,17 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
   }
 
   Widget _buildArtworkInfoBar(AppLocalizations l10n, String localeCode) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white,
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.06)),
+        border: Border.all(
+          color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.06),
+        ),
       ),
       child: Row(
         children: [
@@ -1710,17 +1790,17 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
               children: [
                 Text(
                   _selectedArtwork.localizedTitle(localeCode),
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 13,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1F1F1F),
+                    color: isDark ? Colors.white : const Color(0xFF1F1F1F),
                   ),
                 ),
                 Text(
                   '${_selectedArtwork.technique} • ${_selectedArtwork.createdYear}',
                   style: TextStyle(
                     fontSize: 11,
-                    color: Colors.grey.shade600,
+                    color: isDark ? Colors.white60 : Colors.grey.shade600,
                   ),
                 ),
               ],
@@ -1730,7 +1810,7 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
               decoration: BoxDecoration(
-                color: const Color(0xFFF5F3EF),
+                color: isDark ? theme.colorScheme.surfaceContainer : const Color(0xFFF5F3EF),
                 borderRadius: BorderRadius.circular(8),
               ),
               child: Text(
@@ -1738,10 +1818,10 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                   _bestMoves ?? 0,
                   _formatTime(_bestTimeSeconds!),
                 ),
-                style: const TextStyle(
+                style: TextStyle(
                   fontSize: 10,
                   fontWeight: FontWeight.w600,
-                  color: Color(0xFF7B5E4B),
+                  color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
                 ),
               ),
             ),
@@ -1751,22 +1831,27 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
   }
 
   Widget _buildArtworkInfoCard(AppLocalizations l10n, String localeCode) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.06)),
+        border: Border.all(
+          color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.06),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
             _selectedArtwork.localizedTitle(localeCode),
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 15,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF1F1F1F),
+              color: isDark ? Colors.white : const Color(0xFF1F1F1F),
             ),
           ),
           const SizedBox(height: 4),
@@ -1774,7 +1859,7 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
             '${_selectedArtwork.technique} • ${_selectedArtwork.createdYear}',
             style: TextStyle(
               fontSize: 12,
-              color: Colors.grey.shade600,
+              color: isDark ? Colors.white60 : Colors.grey.shade600,
             ),
           ),
           if (_selectedArtwork.dimensions.isNotEmpty) ...[
@@ -1783,7 +1868,7 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
               '${l10n.dimensions}: ${_selectedArtwork.dimensions}',
               style: TextStyle(
                 fontSize: 11,
-                color: Colors.grey.shade500,
+                color: isDark ? Colors.white60 : Colors.grey.shade500,
               ),
             ),
           ],
@@ -1793,12 +1878,17 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
   }
 
   Widget _buildBestScoreCard(AppLocalizations l10n) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
       decoration: BoxDecoration(
-        color: const Color(0xFFF5F3EF),
+        color: isDark ? theme.colorScheme.surfaceContainer : const Color(0xFFF5F3EF),
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: const Color(0xFF7B5E4B).withValues(alpha: 0.2)),
+        border: Border.all(
+          color: isDark ? theme.colorScheme.outlineVariant : const Color(0xFF7B5E4B).withValues(alpha: 0.2),
+        ),
       ),
       child: Row(
         children: [
@@ -1819,10 +1909,10 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                           _formatTime(_bestTimeSeconds!),
                         )
                       : l10n.noBestScore,
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF7B5E4B),
+                    color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
                   ),
                 ),
               ],
@@ -1834,20 +1924,26 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
   }
 
   Widget _buildReferencePreviewCard(AppLocalizations l10n) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
         Row(
           children: [
-            const Icon(Icons.image_outlined,
-                size: 14, color: Color(0xFF7B5E4B)),
+            Icon(
+              Icons.image_outlined,
+              size: 14,
+              color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
+            ),
             const SizedBox(width: 6),
             Text(
               l10n.previewLabel,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 12,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF1F1F1F),
+                color: isDark ? Colors.white : const Color(0xFF1F1F1F),
               ),
             ),
           ],
@@ -1857,7 +1953,9 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
           borderRadius: BorderRadius.circular(10),
           child: Container(
             decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey.shade300),
+              border: Border.all(
+                color: isDark ? theme.colorScheme.outlineVariant : Colors.grey.shade300,
+              ),
               borderRadius: BorderRadius.circular(10),
             ),
             child: Image.network(
@@ -1877,15 +1975,20 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
   // ===========================================================================
 
   Widget _buildLeaderboardView(AppLocalizations l10n, bool isCompact) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Column(
       children: [
         // Mode Switcher Header
         Container(
           padding: const EdgeInsets.all(8),
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white,
             borderRadius: BorderRadius.circular(12),
-            border: Border.all(color: Colors.black.withValues(alpha: 0.06)),
+            border: Border.all(
+              color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.06),
+            ),
           ),
           child: Column(
             children: [
@@ -1894,7 +1997,7 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                   Expanded(
                     child: Container(
                       decoration: BoxDecoration(
-                        color: const Color(0xFFF5F3EF),
+                        color: isDark ? theme.colorScheme.surfaceContainer : const Color(0xFFF5F3EF),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       padding: const EdgeInsets.all(3),
@@ -1916,7 +2019,7 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
                                   color: _leaderboardMode == 0
-                                      ? Colors.white
+                                      ? (isDark ? theme.colorScheme.surfaceContainerHighest : Colors.white)
                                       : Colors.transparent,
                                   borderRadius: BorderRadius.circular(6),
                                   boxShadow: _leaderboardMode == 0
@@ -1937,8 +2040,8 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                                         ? FontWeight.bold
                                         : FontWeight.normal,
                                     color: _leaderboardMode == 0
-                                        ? const Color(0xFF7B5E4B)
-                                        : Colors.grey.shade700,
+                                        ? (isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B))
+                                        : (isDark ? Colors.white70 : Colors.grey.shade700),
                                   ),
                                 ),
                               ),
@@ -1960,7 +2063,7 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                                 alignment: Alignment.center,
                                 decoration: BoxDecoration(
                                   color: _leaderboardMode == 1
-                                      ? Colors.white
+                                      ? (isDark ? theme.colorScheme.surfaceContainerHighest : Colors.white)
                                       : Colors.transparent,
                                   borderRadius: BorderRadius.circular(6),
                                   boxShadow: _leaderboardMode == 1
@@ -1981,8 +2084,8 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                                         ? FontWeight.bold
                                         : FontWeight.normal,
                                     color: _leaderboardMode == 1
-                                        ? const Color(0xFF7B5E4B)
-                                        : Colors.grey.shade700,
+                                        ? (isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B))
+                                        : (isDark ? Colors.white70 : Colors.grey.shade700),
                                   ),
                                 ),
                               ),
@@ -1994,8 +2097,11 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                   ),
                   const SizedBox(width: 8),
                   IconButton(
-                    icon: const Icon(Icons.refresh,
-                        size: 20, color: Color(0xFF7B5E4B)),
+                    icon: Icon(
+                      Icons.refresh,
+                      size: 20,
+                      color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
+                    ),
                     tooltip: l10n.refresh,
                     onPressed: _loadLeaderboardData,
                   ),
@@ -2024,8 +2130,10 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
         // Leaderboard Content List
         Expanded(
           child: _isLoadingLeaderboard
-              ? const Center(
-                  child: CircularProgressIndicator(color: Color(0xFF7B5E4B)),
+              ? Center(
+                  child: CircularProgressIndicator(
+                    color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
+                  ),
                 )
               : _leaderboardMode == 0
                   ? _buildTotalLeaderboardList(l10n, isCompact)
@@ -2036,7 +2144,10 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
   }
 
   Widget _buildLevelSubTab(int size, String label) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final isSelected = _leaderboardGridSize == size;
+
     return InkWell(
       onTap: () {
         if (_leaderboardGridSize != size) {
@@ -2051,8 +2162,8 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
         decoration: BoxDecoration(
           color: isSelected
-              ? const Color(0xFF7B5E4B)
-              : const Color(0xFFF5F3EF),
+              ? (isDark ? theme.colorScheme.primary : const Color(0xFF7B5E4B))
+              : (isDark ? theme.colorScheme.surfaceContainer : const Color(0xFFF5F3EF)),
           borderRadius: BorderRadius.circular(6),
         ),
         child: Text(
@@ -2060,7 +2171,7 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
           style: TextStyle(
             fontSize: 11,
             fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-            color: isSelected ? Colors.white : Colors.grey.shade700,
+            color: isSelected ? Colors.white : (isDark ? Colors.white70 : Colors.grey.shade700),
           ),
         ),
       ),
@@ -2068,6 +2179,9 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
   }
 
   Widget _buildTotalLeaderboardList(AppLocalizations l10n, bool isCompact) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     if (_totalLeaderboard.isEmpty) {
       return _buildEmptyLeaderboardState(l10n);
     }
@@ -2077,9 +2191,11 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.06)),
+        border: Border.all(
+          color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.06),
+        ),
       ),
       child: ListView.separated(
         padding: const EdgeInsets.all(8),
@@ -2093,7 +2209,9 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
           return Container(
             decoration: BoxDecoration(
               color: isMe
-                  ? const Color(0xFF7B5E4B).withValues(alpha: 0.08)
+                  ? (isDark
+                      ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
+                      : const Color(0xFF7B5E4B).withValues(alpha: 0.08))
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(8),
             ),
@@ -2115,7 +2233,7 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                                 fontSize: 13,
                                 fontWeight:
                                     isMe ? FontWeight.bold : FontWeight.w600,
-                                color: const Color(0xFF1F1F1F),
+                                color: isDark ? Colors.white : const Color(0xFF1F1F1F),
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -2126,7 +2244,7 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF7B5E4B),
+                                color: isDark ? theme.colorScheme.primary : const Color(0xFF7B5E4B),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: const Text(
@@ -2144,7 +2262,9 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                       Text(
                         l10n.puzzlesCompletedCount(entry.puzzlesCompleted),
                         style: TextStyle(
-                            fontSize: 11, color: Colors.grey.shade600),
+                          fontSize: 11,
+                          color: isDark ? Colors.white60 : Colors.grey.shade600,
+                        ),
                       ),
                     ],
                   ),
@@ -2154,10 +2274,10 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                   children: [
                     Text(
                       '${entry.totalPoints} pts',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.bold,
-                        color: Color(0xFF7B5E4B),
+                        color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
                       ),
                     ),
                   ],
@@ -2171,6 +2291,9 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
   }
 
   Widget _buildLevelLeaderboardList(AppLocalizations l10n, bool isCompact) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     if (_levelLeaderboard.isEmpty) {
       return _buildEmptyLeaderboardState(l10n);
     }
@@ -2180,9 +2303,11 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
 
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white,
         borderRadius: BorderRadius.circular(12),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.06)),
+        border: Border.all(
+          color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.06),
+        ),
       ),
       child: ListView.separated(
         padding: const EdgeInsets.all(8),
@@ -2196,7 +2321,9 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
           return Container(
             decoration: BoxDecoration(
               color: isMe
-                  ? const Color(0xFF7B5E4B).withValues(alpha: 0.08)
+                  ? (isDark
+                      ? theme.colorScheme.primaryContainer.withValues(alpha: 0.3)
+                      : const Color(0xFF7B5E4B).withValues(alpha: 0.08))
                   : Colors.transparent,
               borderRadius: BorderRadius.circular(8),
             ),
@@ -2218,7 +2345,7 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                                 fontSize: 13,
                                 fontWeight:
                                     isMe ? FontWeight.bold : FontWeight.w600,
-                                color: const Color(0xFF1F1F1F),
+                                color: isDark ? Colors.white : const Color(0xFF1F1F1F),
                               ),
                               overflow: TextOverflow.ellipsis,
                             ),
@@ -2229,7 +2356,7 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                               padding: const EdgeInsets.symmetric(
                                   horizontal: 6, vertical: 2),
                               decoration: BoxDecoration(
-                                color: const Color(0xFF7B5E4B),
+                                color: isDark ? theme.colorScheme.primary : const Color(0xFF7B5E4B),
                                 borderRadius: BorderRadius.circular(10),
                               ),
                               child: const Text(
@@ -2250,7 +2377,7 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                             Text(
                               '${_formatTime(entry.bestDuration)} • ',
                               style: TextStyle(
-                                  fontSize: 11, color: Colors.grey.shade600),
+                                  fontSize: 11, color: isDark ? Colors.white60 : Colors.grey.shade600),
                             ),
                           if (entry.bestMoves > 0)
                             Text(

@@ -176,7 +176,9 @@ class _AdminNavBar extends StatelessWidget {
               overflow: TextOverflow.ellipsis,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
-                    color: const Color(0xFF2D2D2D),
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white
+                        : const Color(0xFF2D2D2D),
                     fontSize: isSmall ? 14 : 16,
                   ),
             ),
@@ -185,21 +187,27 @@ class _AdminNavBar extends StatelessWidget {
           Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Container(
-                padding: const EdgeInsets.all(2),
-                decoration: BoxDecoration(
-                  color: Colors.white.withValues(alpha: 0.72),
-                  borderRadius: BorderRadius.circular(20),
-                  border: Border.all(color: Colors.black.withValues(alpha: 0.08)),
-                ),
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _langBtn('MK', isMk, () => localeController.setLanguageCode('mk')),
-                    _langBtn('EN', !isMk, () => localeController.setLanguageCode('en')),
-                  ],
-                ),
-              ),
+              Builder(builder: (context) {
+                final isDark = Theme.of(context).brightness == Brightness.dark;
+                final theme = Theme.of(context);
+                return Container(
+                  padding: const EdgeInsets.all(2),
+                  decoration: BoxDecoration(
+                    color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white.withValues(alpha: 0.72),
+                    borderRadius: BorderRadius.circular(20),
+                    border: Border.all(
+                      color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.08),
+                    ),
+                  ),
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _langBtn(context, 'MK', isMk, () => localeController.setLanguageCode('mk')),
+                      _langBtn(context, 'EN', !isMk, () => localeController.setLanguageCode('en')),
+                    ],
+                  ),
+                );
+              }),
               if (currentUser != null) ...[
                 SizedBox(width: isSmall ? 4 : 10),
                 TextButton.icon(
@@ -225,14 +233,19 @@ class _AdminNavBar extends StatelessWidget {
     );
   }
 
-  Widget _langBtn(String label, bool selected, VoidCallback onTap) {
+  Widget _langBtn(BuildContext context, String label, bool selected, VoidCallback onTap) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFF2D2D2D) : Colors.transparent,
+          color: selected
+              ? (isDark ? theme.colorScheme.primary : const Color(0xFF2D2D2D))
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Text(
@@ -240,7 +253,7 @@ class _AdminNavBar extends StatelessWidget {
           style: TextStyle(
             fontSize: 11,
             fontWeight: FontWeight.w600,
-            color: selected ? Colors.white : const Color(0xFF666666),
+            color: selected ? Colors.white : (isDark ? Colors.white70 : const Color(0xFF666666)),
           ),
         ),
       ),
@@ -312,6 +325,7 @@ class _AdminLoginFormState extends State<_AdminLoginForm> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Center(
       child: SingleChildScrollView(
@@ -320,9 +334,11 @@ class _AdminLoginFormState extends State<_AdminLoginForm> {
           constraints: const BoxConstraints(maxWidth: 420),
           child: Card(
             elevation: 0,
-            color: Colors.white.withValues(alpha: 0.95),
+            color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white.withValues(alpha: 0.95),
             shape: RoundedRectangleBorder(
-              side: BorderSide(color: Colors.black.withValues(alpha: 0.08)),
+              side: BorderSide(
+                color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.08),
+              ),
               borderRadius: BorderRadius.circular(12),
             ),
             child: Padding(
@@ -331,10 +347,10 @@ class _AdminLoginFormState extends State<_AdminLoginForm> {
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.stretch,
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.admin_panel_settings,
                     size: 48,
-                    color: Color(0xFF7B5E4B),
+                    color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
                   ),
                   const SizedBox(height: 16),
                   Text(
@@ -385,7 +401,7 @@ class _AdminLoginFormState extends State<_AdminLoginForm> {
                     onPressed: _isLoading ? null : () => _login(l10n),
                     style: ElevatedButton.styleFrom(
                       padding: const EdgeInsets.symmetric(vertical: 16),
-                      backgroundColor: const Color(0xFF2D2D2D),
+                      backgroundColor: isDark ? theme.colorScheme.primary : const Color(0xFF2D2D2D),
                       foregroundColor: Colors.white,
                     ),
                     child: _isLoading
@@ -438,6 +454,8 @@ class _AdminDashboardState extends State<_AdminDashboard>
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
     final isSmall = screenWidth < 600;
 
@@ -449,17 +467,19 @@ class _AdminDashboardState extends State<_AdminDashboard>
             Container(
               margin: const EdgeInsets.symmetric(horizontal: 16),
               decoration: BoxDecoration(
-                color: Colors.white.withValues(alpha: 0.8),
+                color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white.withValues(alpha: 0.8),
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(color: Colors.black.withValues(alpha: 0.08)),
+                border: Border.all(
+                  color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.08),
+                ),
               ),
               child: TabBar(
                 controller: _tabController,
                 isScrollable: true,
                 tabAlignment: TabAlignment.start,
-                labelColor: const Color(0xFF7B5E4B),
-                unselectedLabelColor: const Color(0xFF666666),
-                indicatorColor: const Color(0xFF7B5E4B),
+                labelColor: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
+                unselectedLabelColor: isDark ? Colors.white60 : const Color(0xFF666666),
+                indicatorColor: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
                 padding: const EdgeInsets.symmetric(horizontal: 4),
                 tabs: [
                   _buildTab(Icons.palette_outlined, l10n.manageArtworks, isSmall),
@@ -578,128 +598,140 @@ class _ArtworksManagementSection extends StatelessWidget {
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 1020),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Wrap(
-                spacing: 12,
-                runSpacing: 10,
-                alignment: WrapAlignment.spaceBetween,
-                crossAxisAlignment: WrapCrossAlignment.center,
-                children: [
-                  Text(
-                    '${l10n.manageArtworks} (${artworks.length})',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                  ),
-                  ElevatedButton.icon(
-                    onPressed: () => _showArtworkForm(context),
-                    icon: const Icon(Icons.add),
-                    label: Text(l10n.addArtwork),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF7B5E4B),
-                      foregroundColor: Colors.white,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              if (artworks.isEmpty)
-                Card(
-                  child: Padding(
-                    padding: const EdgeInsets.all(48),
-                    child: Center(child: Text(l10n.noArtworksFound)),
-                  ),
-                )
-              else
-                Card(
-                  elevation: 0,
-                  color: Colors.white.withValues(alpha: 0.95),
-                  shape: RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.black.withValues(alpha: 0.08)),
-                    borderRadius: BorderRadius.circular(8),
-                  ),
-                  child: ListView.separated(
-                    shrinkWrap: true,
-                    physics: const NeverScrollableScrollPhysics(),
-                    itemCount: artworks.length,
-                    separatorBuilder: (context, index) => const Divider(height: 1),
-                    itemBuilder: (context, index) {
-                      final item = artworks[index];
-                      return ListTile(
-                        leading: ClipRRect(
-                          borderRadius: BorderRadius.circular(4),
-                          child: Container(
-                            width: 50,
-                            height: 50,
-                            color: Colors.grey.shade200,
-                            child: item.imageUrl.isNotEmpty
-                                ? Image.network(
-                                    item.imageUrl,
-                                    fit: BoxFit.cover,
-                                    errorBuilder: (context, error, stackTrace) =>
-                                        const Icon(Icons.palette_outlined),
-                                  )
-                                : const Icon(Icons.palette_outlined),
+          child: Builder(builder: (context) {
+            final theme = Theme.of(context);
+            final isDark = theme.brightness == Brightness.dark;
+            return Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Wrap(
+                  spacing: 12,
+                  runSpacing: 10,
+                  alignment: WrapAlignment.spaceBetween,
+                  crossAxisAlignment: WrapCrossAlignment.center,
+                  children: [
+                    Text(
+                      '${l10n.manageArtworks} (${artworks.length})',
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w600,
                           ),
-                        ),
-                        title: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
-                                item.localizedTitle(Localizations.localeOf(context).languageCode),
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontWeight: FontWeight.w600),
-                              ),
+                    ),
+                    ElevatedButton.icon(
+                      onPressed: () => _showArtworkForm(context),
+                      icon: const Icon(Icons.add),
+                      label: Text(l10n.addArtwork),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: const Color(0xFF7B5E4B),
+                        foregroundColor: Colors.white,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 16),
+                if (artworks.isEmpty)
+                  Card(
+                    child: Padding(
+                      padding: const EdgeInsets.all(48),
+                      child: Center(child: Text(l10n.noArtworksFound)),
+                    ),
+                  )
+                else
+                  Card(
+                    elevation: 0,
+                    color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white.withValues(alpha: 0.95),
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(
+                        color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.08),
+                      ),
+                      borderRadius: BorderRadius.circular(8),
+                    ),
+                    child: ListView.separated(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      itemCount: artworks.length,
+                      separatorBuilder: (context, index) => const Divider(height: 1),
+                      itemBuilder: (context, index) {
+                        final item = artworks[index];
+                        return ListTile(
+                          leading: ClipRRect(
+                            borderRadius: BorderRadius.circular(4),
+                            child: Container(
+                              width: 50,
+                              height: 50,
+                              color: isDark ? theme.colorScheme.surfaceContainer : Colors.grey.shade200,
+                              child: item.imageUrl.isNotEmpty
+                                  ? Image.network(
+                                      item.imageUrl,
+                                      fit: BoxFit.cover,
+                                      errorBuilder: (context, error, stackTrace) =>
+                                          const Icon(Icons.palette_outlined),
+                                    )
+                                  : const Icon(Icons.palette_outlined),
                             ),
-                            if (item.isFeatured) ...[
-                              const SizedBox(width: 8),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                decoration: BoxDecoration(
-                                  color: Colors.amber.shade100,
-                                  borderRadius: BorderRadius.circular(4),
-                                ),
+                          ),
+                          title: Row(
+                            children: [
+                              Expanded(
                                 child: Text(
-                                  l10n.featured,
+                                  item.localizedTitle(Localizations.localeOf(context).languageCode),
+                                  maxLines: 1,
+                                  overflow: TextOverflow.ellipsis,
                                   style: TextStyle(
-                                    fontSize: 11,
-                                    color: Colors.amber.shade900,
-                                    fontWeight: FontWeight.bold,
+                                    fontWeight: FontWeight.w600,
+                                    color: isDark ? Colors.white : Colors.black87,
                                   ),
                                 ),
                               ),
+                              if (item.isFeatured) ...[
+                                const SizedBox(width: 8),
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.amber.shade100,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    l10n.featured,
+                                    style: TextStyle(
+                                      fontSize: 11,
+                                      color: Colors.amber.shade900,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              ],
                             ],
-                          ],
-                        ),
-                        subtitle: Text(
-                          '${item.technique} • ${item.createdYear} • ${item.dimensions}',
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                        trailing: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            IconButton(
-                              icon: const Icon(Icons.edit_outlined, color: Colors.blue),
-                              tooltip: l10n.editArtwork,
-                              onPressed: () => _showArtworkForm(context, item),
+                          ),
+                          subtitle: Text(
+                            '${item.technique} • ${item.createdYear} • ${item.dimensions}',
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: TextStyle(
+                              color: isDark ? Colors.white70 : Colors.grey.shade600,
                             ),
-                            IconButton(
-                              icon: const Icon(Icons.delete_outline, color: Colors.red),
-                              tooltip: l10n.deleteArtwork,
-                              onPressed: () => _confirmDelete(context, item),
-                            ),
-                          ],
-                        ),
-                      );
-                    },
+                          ),
+                          trailing: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              IconButton(
+                                icon: const Icon(Icons.edit_outlined, color: Colors.blue),
+                                tooltip: l10n.editArtwork,
+                                onPressed: () => _showArtworkForm(context, item),
+                              ),
+                              IconButton(
+                                icon: const Icon(Icons.delete_outline, color: Colors.red),
+                                tooltip: l10n.deleteArtwork,
+                                onPressed: () => _confirmDelete(context, item),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
+                    ),
                   ),
-                ),
-            ],
-          ),
+              ],
+            );
+          }),
         ),
       ),
     );
@@ -1160,6 +1192,8 @@ class _ArtistProfileSectionState extends State<_ArtistProfileSection> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
@@ -1168,9 +1202,11 @@ class _ArtistProfileSectionState extends State<_ArtistProfileSection> {
           constraints: const BoxConstraints(maxWidth: 720),
           child: Card(
             elevation: 0,
-            color: Colors.white.withValues(alpha: 0.95),
+            color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white.withValues(alpha: 0.95),
             shape: RoundedRectangleBorder(
-              side: BorderSide(color: Colors.black.withValues(alpha: 0.08)),
+              side: BorderSide(
+                color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.08),
+              ),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Padding(
@@ -1352,6 +1388,8 @@ class _GuestbookModerationSectionState extends State<_GuestbookModerationSection
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final entries = widget.dataController.allGuestbookEntries;
 
     return SingleChildScrollView(
@@ -1390,9 +1428,11 @@ class _GuestbookModerationSectionState extends State<_GuestbookModerationSection
               if (entries.isEmpty)
                 Card(
                   elevation: 0,
-                  color: Colors.white.withValues(alpha: 0.95),
+                  color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white.withValues(alpha: 0.95),
                   shape: RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.black.withValues(alpha: 0.08)),
+                    side: BorderSide(
+                      color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.08),
+                    ),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: Padding(
@@ -1403,9 +1443,11 @@ class _GuestbookModerationSectionState extends State<_GuestbookModerationSection
               else
                 Card(
                   elevation: 0,
-                  color: Colors.white.withValues(alpha: 0.95),
+                  color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white.withValues(alpha: 0.95),
                   shape: RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.black.withValues(alpha: 0.08)),
+                    side: BorderSide(
+                      color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.08),
+                    ),
                     borderRadius: BorderRadius.circular(8),
                   ),
                   child: ListView.separated(
@@ -1423,7 +1465,10 @@ class _GuestbookModerationSectionState extends State<_GuestbookModerationSection
                                 item.authorName,
                                 maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(fontWeight: FontWeight.w600),
+                                style: TextStyle(
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark ? Colors.white : Colors.black87,
+                                ),
                               ),
                             ),
                             const SizedBox(width: 8),
@@ -1451,7 +1496,12 @@ class _GuestbookModerationSectionState extends State<_GuestbookModerationSection
                         ),
                         subtitle: Padding(
                           padding: const EdgeInsets.only(top: 4),
-                          child: Text(item.message),
+                          child: Text(
+                            item.message,
+                            style: TextStyle(
+                              color: isDark ? Colors.white70 : Colors.black87,
+                            ),
+                          ),
                         ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
@@ -1605,12 +1655,13 @@ class _ArtworkCommentsModerationSectionState
                       separatorBuilder: (context, index) => const SizedBox(height: 12),
                       itemBuilder: (context, index) {
                         final comment = comments[index];
+                        final isDark = theme.brightness == Brightness.dark;
                         return Card(
                           elevation: 0,
-                          color: Colors.white.withValues(alpha: 0.9),
+                          color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white.withValues(alpha: 0.9),
                           shape: RoundedRectangleBorder(
                             side: BorderSide(
-                              color: Colors.black.withValues(alpha: 0.08),
+                              color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.08),
                             ),
                             borderRadius: BorderRadius.circular(8),
                           ),
@@ -1625,9 +1676,10 @@ class _ArtworkCommentsModerationSectionState
                                   children: [
                                     Text(
                                       comment.authorName,
-                                      style: const TextStyle(
+                                      style: TextStyle(
                                         fontWeight: FontWeight.bold,
                                         fontSize: 15,
+                                        color: isDark ? Colors.white : Colors.black87,
                                       ),
                                     ),
                                     Container(
@@ -1889,6 +1941,8 @@ class __PuzzleScoresModerationSectionState
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final screenWidth = MediaQuery.of(context).size.width;
     final isCompact = screenWidth < 600;
 
@@ -1939,7 +1993,7 @@ class __PuzzleScoresModerationSectionState
                       Container(
                         padding: const EdgeInsets.all(3),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFF5F3EF),
+                          color: isDark ? theme.colorScheme.surfaceContainerHigh : const Color(0xFFF5F3EF),
                           borderRadius: BorderRadius.circular(8),
                         ),
                         child: Row(
@@ -1952,7 +2006,7 @@ class __PuzzleScoresModerationSectionState
                                     horizontal: 10, vertical: 6),
                                 decoration: BoxDecoration(
                                   color: _viewMode == 0
-                                      ? Colors.white
+                                      ? (isDark ? theme.colorScheme.surfaceContainerHighest : Colors.white)
                                       : Colors.transparent,
                                   borderRadius: BorderRadius.circular(6),
                                 ),
@@ -1964,8 +2018,8 @@ class __PuzzleScoresModerationSectionState
                                         ? FontWeight.bold
                                         : FontWeight.normal,
                                     color: _viewMode == 0
-                                        ? const Color(0xFF7B5E4B)
-                                        : Colors.grey.shade700,
+                                        ? (isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B))
+                                        : (isDark ? Colors.white70 : Colors.grey.shade700),
                                   ),
                                 ),
                               ),
@@ -1977,7 +2031,7 @@ class __PuzzleScoresModerationSectionState
                                     horizontal: 10, vertical: 6),
                                 decoration: BoxDecoration(
                                   color: _viewMode == 1
-                                      ? Colors.white
+                                      ? (isDark ? theme.colorScheme.surfaceContainerHighest : Colors.white)
                                       : Colors.transparent,
                                   borderRadius: BorderRadius.circular(6),
                                 ),
@@ -1989,8 +2043,8 @@ class __PuzzleScoresModerationSectionState
                                         ? FontWeight.bold
                                         : FontWeight.normal,
                                     color: _viewMode == 1
-                                        ? const Color(0xFF7B5E4B)
-                                        : Colors.grey.shade700,
+                                        ? (isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B))
+                                        : (isDark ? Colors.white70 : Colors.grey.shade700),
                                   ),
                                 ),
                               ),
@@ -2000,7 +2054,10 @@ class __PuzzleScoresModerationSectionState
                       ),
                       const SizedBox(width: 8),
                       IconButton(
-                        icon: const Icon(Icons.refresh, color: Color(0xFF7B5E4B)),
+                        icon: Icon(
+                          Icons.refresh,
+                          color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
+                        ),
                         tooltip: l10n.refresh,
                         onPressed: _loadScores,
                       ),
@@ -2027,13 +2084,14 @@ class __PuzzleScoresModerationSectionState
                         )
                       : null,
                   filled: true,
-                  fillColor: Colors.white,
+                  fillColor: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white,
                   contentPadding:
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(10),
                     borderSide: BorderSide(
-                        color: Colors.black.withValues(alpha: 0.1)),
+                      color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.1),
+                    ),
                   ),
                 ),
                 onSubmitted: (_) => _loadScores(),
@@ -2057,20 +2115,25 @@ class __PuzzleScoresModerationSectionState
                 ),
 
               if (_isLoading)
-                const Center(
+                Center(
                   child: Padding(
-                    padding: EdgeInsets.all(32),
-                    child: CircularProgressIndicator(color: Color(0xFF7B5E4B)),
+                    padding: const EdgeInsets.all(32),
+                    child: CircularProgressIndicator(
+                      color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
+                    ),
                   ),
                 )
               else if (_scores.isEmpty)
                 Card(
+                  color: isDark ? theme.colorScheme.surfaceContainerHigh : null,
                   child: Padding(
                     padding: const EdgeInsets.all(32),
                     child: Center(
                       child: Text(
                         l10n.noEntries,
-                        style: TextStyle(color: Colors.grey.shade600),
+                        style: TextStyle(
+                          color: isDark ? Colors.white70 : Colors.grey.shade600,
+                        ),
                       ),
                     ),
                   ),
@@ -2084,11 +2147,14 @@ class __PuzzleScoresModerationSectionState
                   itemBuilder: (context, index) {
                     final item = nicknameList[index];
                     return Card(
+                      elevation: 0,
+                      color: isDark ? theme.colorScheme.surfaceContainerHigh : null,
                       margin: const EdgeInsets.only(bottom: 10),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                         side: BorderSide(
-                            color: Colors.black.withValues(alpha: 0.08)),
+                          color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.08),
+                        ),
                       ),
                       child: Padding(
                         padding: const EdgeInsets.all(12),
@@ -2098,16 +2164,17 @@ class __PuzzleScoresModerationSectionState
                               width: 36,
                               height: 36,
                               decoration: BoxDecoration(
-                                color: const Color(0xFF7B5E4B)
-                                    .withValues(alpha: 0.1),
+                                color: isDark
+                                    ? theme.colorScheme.primaryContainer
+                                    : const Color(0xFF7B5E4B).withValues(alpha: 0.1),
                                 shape: BoxShape.circle,
                               ),
                               alignment: Alignment.center,
                               child: Text(
                                 '${index + 1}',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontWeight: FontWeight.bold,
-                                  color: Color(0xFF7B5E4B),
+                                  color: isDark ? theme.colorScheme.onPrimaryContainer : const Color(0xFF7B5E4B),
                                 ),
                               ),
                             ),
@@ -2118,10 +2185,10 @@ class __PuzzleScoresModerationSectionState
                                 children: [
                                   Text(
                                     item.nickname,
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 14,
                                       fontWeight: FontWeight.bold,
-                                      color: Color(0xFF1F1F1F),
+                                      color: isDark ? Colors.white : const Color(0xFF1F1F1F),
                                     ),
                                   ),
                                   const SizedBox(height: 2),
@@ -2129,7 +2196,7 @@ class __PuzzleScoresModerationSectionState
                                     '${l10n.scoresCount(item.count)} • 3x3: ${item.best3x3} pts | 4x4: ${item.best4x4} pts | 5x5: ${item.best5x5} pts',
                                     style: TextStyle(
                                       fontSize: 11,
-                                      color: Colors.grey.shade600,
+                                      color: isDark ? Colors.white60 : Colors.grey.shade600,
                                     ),
                                   ),
                                 ],
@@ -2140,10 +2207,10 @@ class __PuzzleScoresModerationSectionState
                               children: [
                                 Text(
                                   '${item.totalPoints} pts',
-                                  style: const TextStyle(
+                                  style: TextStyle(
                                     fontSize: 14,
                                     fontWeight: FontWeight.bold,
-                                    color: Color(0xFF7B5E4B),
+                                    color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
                                   ),
                                 ),
                                 IconButton(
@@ -2172,34 +2239,40 @@ class __PuzzleScoresModerationSectionState
                   itemBuilder: (context, index) {
                     final item = _scores[index];
                     return Card(
+                      elevation: 0,
+                      color: isDark ? theme.colorScheme.surfaceContainerHigh : null,
                       margin: const EdgeInsets.only(bottom: 8),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(10),
                         side: BorderSide(
-                            color: Colors.black.withValues(alpha: 0.08)),
+                          color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.08),
+                        ),
                       ),
                       child: ListTile(
                         dense: isCompact,
                         title: Text(
                           item.nickname,
-                          style: const TextStyle(
+                          style: TextStyle(
                             fontWeight: FontWeight.bold,
                             fontSize: 13,
+                            color: isDark ? Colors.white : Colors.black87,
                           ),
                         ),
                         subtitle: Text(
                           '${item.gridSize}x${item.gridSize} • ${_formatTime(item.durationSeconds)} • ${item.movesCount} ${l10n.movesLabel.toLowerCase()}',
                           style: TextStyle(
-                              fontSize: 11, color: Colors.grey.shade600),
+                            fontSize: 11,
+                            color: isDark ? Colors.white60 : Colors.grey.shade600,
+                          ),
                         ),
                         trailing: Row(
                           mainAxisSize: MainAxisSize.min,
                           children: [
                             Text(
                               '+${item.pointsEarned} pts',
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF7B5E4B),
+                                color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
                               ),
                             ),
                             const SizedBox(width: 8),

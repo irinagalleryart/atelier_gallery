@@ -182,6 +182,7 @@ class _TopGalleryNavBar extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     final publicTabs = [
       l10n.home,
@@ -210,7 +211,11 @@ class _TopGalleryNavBar extends StatelessWidget {
                       height: isDesktop ? 30 : 24,
                       fit: BoxFit.contain,
                       errorBuilder: (context, error, stackTrace) {
-                        return const Icon(Icons.palette_outlined, size: 24, color: Color(0xFF7B5E4B));
+                        return Icon(
+                          Icons.palette_outlined,
+                          size: 24,
+                          color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
+                        );
                       },
                     ),
                     const SizedBox(width: 8),
@@ -221,7 +226,7 @@ class _TopGalleryNavBar extends StatelessWidget {
                         overflow: TextOverflow.ellipsis,
                         style: theme.textTheme.titleMedium?.copyWith(
                           fontWeight: FontWeight.w700,
-                          color: const Color(0xFF2D2D2D),
+                          color: isDark ? Colors.white : const Color(0xFF2D2D2D),
                           letterSpacing: 0.2,
                         ),
                       ),
@@ -258,8 +263,8 @@ class _TopGalleryNavBar extends StatelessWidget {
                                       ? FontWeight.w600
                                       : FontWeight.w400,
                                   color: isSelected
-                                      ? const Color(0xFF7B5E4B)
-                                      : const Color(0xFF2D2D2D),
+                                      ? (isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B))
+                                      : (isDark ? Colors.white70 : const Color(0xFF2D2D2D)),
                                 ),
                               ),
                               const SizedBox(height: 5),
@@ -267,7 +272,7 @@ class _TopGalleryNavBar extends StatelessWidget {
                                 duration: const Duration(milliseconds: 200),
                                 height: 1.5,
                                 width: isSelected ? 36 : 0,
-                                color: const Color(0xFFD4B9A5),
+                                color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFFD4B9A5),
                               ),
                             ],
                           ),
@@ -310,6 +315,8 @@ class _FavoritesQuickButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final count = dataController.favoriteArtworkIds.length;
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Tooltip(
       message: l10n.favorites,
@@ -319,9 +326,11 @@ class _FavoritesQuickButton extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
           decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.72),
+            color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white.withValues(alpha: 0.72),
             borderRadius: BorderRadius.circular(20),
-            border: Border.all(color: Colors.black.withValues(alpha: 0.08)),
+            border: Border.all(
+              color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.08),
+            ),
           ),
           child: Row(
             mainAxisSize: MainAxisSize.min,
@@ -331,10 +340,10 @@ class _FavoritesQuickButton extends StatelessWidget {
                 const SizedBox(width: 4),
                 Text(
                   '$count',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 12,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF2D2D2D),
+                    color: isDark ? Colors.white : const Color(0xFF2D2D2D),
                   ),
                 ),
               ],
@@ -355,23 +364,29 @@ class _CompactLanguageToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isMk = localeController.isMacedonian;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.72),
+        color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white.withValues(alpha: 0.72),
         borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: Colors.black.withValues(alpha: 0.08)),
+        border: Border.all(
+          color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.08),
+        ),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           _buildLangOption(
+            context,
             label: 'MK',
             selected: isMk,
             onTap: () => localeController.setLanguageCode('mk'),
           ),
           _buildLangOption(
+            context,
             label: 'EN',
             selected: !isMk,
             onTap: () => localeController.setLanguageCode('en'),
@@ -381,18 +396,24 @@ class _CompactLanguageToggle extends StatelessWidget {
     );
   }
 
-  Widget _buildLangOption({
+  Widget _buildLangOption(
+    BuildContext context, {
     required String label,
     required bool selected,
     required VoidCallback onTap,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return GestureDetector(
       onTap: onTap,
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
         decoration: BoxDecoration(
-          color: selected ? const Color(0xFF2D2D2D) : Colors.transparent,
+          color: selected
+              ? (isDark ? theme.colorScheme.primary : const Color(0xFF2D2D2D))
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(16),
         ),
         child: Text(
@@ -401,7 +422,7 @@ class _CompactLanguageToggle extends StatelessWidget {
             fontSize: 12,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.5,
-            color: selected ? Colors.white : const Color(0xFF666666),
+            color: selected ? Colors.white : (isDark ? Colors.white70 : const Color(0xFF666666)),
           ),
         ),
       ),
@@ -536,6 +557,7 @@ class _HomeTabState extends State<_HomeTab> with SingleTickerProviderStateMixin 
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final localeCode = Localizations.localeOf(context).languageCode;
     final screenWidth = MediaQuery.of(context).size.width;
 
@@ -579,7 +601,7 @@ class _HomeTabState extends State<_HomeTab> with SingleTickerProviderStateMixin 
                                 maxHeight: screenWidth > 760 ? 400 : 280,
                               ),
                               decoration: BoxDecoration(
-                                color: const Color(0xFFFAF9F6),
+                                color: isDark ? theme.colorScheme.surfaceContainerHigh : const Color(0xFFFAF9F6),
                                 boxShadow: [
                                   BoxShadow(
                                     color: Colors.black.withValues(alpha: 0.16),
@@ -642,7 +664,7 @@ class _HomeTabState extends State<_HomeTab> with SingleTickerProviderStateMixin 
                             : activeFeatured.localizedTitle(localeCode),
                         style: theme.textTheme.bodyMedium?.copyWith(
                           fontSize: 14,
-                          color: const Color(0xFF4A4A4A),
+                          color: isDark ? Colors.white70 : const Color(0xFF4A4A4A),
                           fontWeight: FontWeight.w400,
                         ),
                         textAlign: TextAlign.center,
@@ -662,7 +684,7 @@ class _HomeTabState extends State<_HomeTab> with SingleTickerProviderStateMixin 
                                 height: 6,
                                 decoration: BoxDecoration(
                                   color: isActive
-                                      ? const Color(0xFF1F1F1F)
+                                      ? (isDark ? Colors.white : const Color(0xFF1F1F1F))
                                       : Colors.grey.shade400,
                                   borderRadius: BorderRadius.circular(3),
                                 ),
@@ -684,7 +706,7 @@ class _HomeTabState extends State<_HomeTab> with SingleTickerProviderStateMixin 
                 style: theme.textTheme.displaySmall?.copyWith(
                   fontSize: screenWidth > 760 ? 40 : 26,
                   fontWeight: FontWeight.w400,
-                  color: const Color(0xFF1F1F1F),
+                  color: isDark ? Colors.white : const Color(0xFF1F1F1F),
                   letterSpacing: -0.3,
                 ),
                 textAlign: TextAlign.center,
@@ -708,8 +730,8 @@ class _HomeTabState extends State<_HomeTab> with SingleTickerProviderStateMixin 
                       overflow: TextOverflow.ellipsis,
                     ),
                     style: OutlinedButton.styleFrom(
-                      foregroundColor: const Color(0xFF1F1F1F),
-                      side: BorderSide(color: Colors.grey.shade400),
+                      foregroundColor: isDark ? Colors.white : const Color(0xFF1F1F1F),
+                      side: BorderSide(color: isDark ? Colors.white38 : Colors.grey.shade400),
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(24),
@@ -732,21 +754,27 @@ class _HomeTabState extends State<_HomeTab> with SingleTickerProviderStateMixin 
                           );
                         }
                       },
-                      icon: const Icon(Icons.extension_outlined, size: 18, color: Color(0xFF7B5E4B)),
+                      icon: Icon(
+                        Icons.extension_outlined,
+                        size: 18,
+                        color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
+                      ),
                       label: Text(
                         l10n.artPuzzle,
                         maxLines: 1,
                         softWrap: false,
                         overflow: TextOverflow.ellipsis,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF1F1F1F),
+                          color: isDark ? Colors.white : const Color(0xFF1F1F1F),
                         ),
                       ),
                       style: OutlinedButton.styleFrom(
-                        backgroundColor: Colors.white,
-                        foregroundColor: const Color(0xFF1F1F1F),
-                        side: BorderSide(color: const Color(0xFF7B5E4B).withValues(alpha: 0.6)),
+                        backgroundColor: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white,
+                        foregroundColor: isDark ? Colors.white : const Color(0xFF1F1F1F),
+                        side: BorderSide(
+                          color: const Color(0xFF7B5E4B).withValues(alpha: isDark ? 0.8 : 0.6),
+                        ),
                         elevation: 1,
                         padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
                         shape: RoundedRectangleBorder(
@@ -789,7 +817,7 @@ class _HomeTabState extends State<_HomeTab> with SingleTickerProviderStateMixin 
                 style: theme.textTheme.headlineSmall?.copyWith(
                   fontSize: screenWidth > 760 ? 22 : 19,
                   fontWeight: FontWeight.w400,
-                  color: const Color(0xFF2B2B2B),
+                  color: isDark ? Colors.white : const Color(0xFF2B2B2B),
                 ),
                 textAlign: TextAlign.center,
               ),
@@ -864,12 +892,15 @@ class _GalleryViewModeToggle extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white,
         borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: Colors.black.withValues(alpha: 0.08),
+          color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.08),
         ),
         boxShadow: [
           BoxShadow(
@@ -907,7 +938,10 @@ class _GalleryViewModeToggle extends StatelessWidget {
     required IconData icon,
     required String label,
   }) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final isSelected = currentMode == mode;
+
     return InkWell(
       onTap: () {
         if (!isSelected) {
@@ -921,7 +955,9 @@ class _GalleryViewModeToggle extends StatelessWidget {
         curve: Curves.easeInOut,
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFF7B5E4B) : Colors.transparent,
+          color: isSelected
+              ? (isDark ? theme.colorScheme.primary : const Color(0xFF7B5E4B))
+              : Colors.transparent,
           borderRadius: BorderRadius.circular(20),
         ),
         child: Row(
@@ -930,7 +966,7 @@ class _GalleryViewModeToggle extends StatelessWidget {
             Icon(
               icon,
               size: 16,
-              color: isSelected ? Colors.white : Colors.black54,
+              color: isSelected ? Colors.white : (isDark ? Colors.white60 : Colors.black54),
             ),
             const SizedBox(width: 6),
             Text(
@@ -938,7 +974,7 @@ class _GalleryViewModeToggle extends StatelessWidget {
               style: TextStyle(
                 fontSize: 13,
                 fontWeight: isSelected ? FontWeight.w600 : FontWeight.w400,
-                color: isSelected ? Colors.white : const Color(0xFF1F1F1F),
+                color: isSelected ? Colors.white : (isDark ? Colors.white70 : const Color(0xFF1F1F1F)),
               ),
             ),
           ],
@@ -1007,6 +1043,7 @@ class _GalleryTabState extends State<_GalleryTab> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final localeCode = Localizations.localeOf(context).languageCode;
     final screenWidth = MediaQuery.of(context).size.width;
     final favCount = widget.dataController.favoriteArtworkIds.length;
@@ -1049,7 +1086,7 @@ class _GalleryTabState extends State<_GalleryTab> {
                           l10n.gallery,
                           style: theme.textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.w500,
-                            color: const Color(0xFF1F1F1F),
+                            color: isDark ? Colors.white : const Color(0xFF1F1F1F),
                           ),
                         ),
                         Row(
@@ -1069,19 +1106,25 @@ class _GalleryTabState extends State<_GalleryTab> {
                                   );
                                 }
                               },
-                              icon: const Icon(Icons.extension_outlined, size: 18, color: Color(0xFF7B5E4B)),
+                              icon: Icon(
+                                Icons.extension_outlined,
+                                size: 18,
+                                color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
+                              ),
                               label: Text(
                                 l10n.artPuzzle,
                                 maxLines: 1,
                                 softWrap: false,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  color: Color(0xFF1F1F1F),
+                                style: TextStyle(
+                                  color: isDark ? Colors.white : const Color(0xFF1F1F1F),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                               style: OutlinedButton.styleFrom(
-                                side: BorderSide(color: const Color(0xFF7B5E4B).withValues(alpha: 0.4)),
+                                side: BorderSide(
+                                  color: const Color(0xFF7B5E4B).withValues(alpha: isDark ? 0.8 : 0.4),
+                                ),
                                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20),
@@ -1098,8 +1141,8 @@ class _GalleryTabState extends State<_GalleryTab> {
                                   maxLines: 1,
                                   softWrap: false,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    color: Color(0xFF1F1F1F),
+                                  style: TextStyle(
+                                    color: isDark ? Colors.white : const Color(0xFF1F1F1F),
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -1123,7 +1166,7 @@ class _GalleryTabState extends State<_GalleryTab> {
                           l10n.gallery,
                           style: theme.textTheme.headlineMedium?.copyWith(
                             fontWeight: FontWeight.w500,
-                            color: const Color(0xFF1F1F1F),
+                            color: isDark ? Colors.white : const Color(0xFF1F1F1F),
                           ),
                         ),
                         const SizedBox(height: 12),
@@ -1145,19 +1188,25 @@ class _GalleryTabState extends State<_GalleryTab> {
                                   );
                                 }
                               },
-                              icon: const Icon(Icons.extension_outlined, size: 18, color: Color(0xFF7B5E4B)),
+                              icon: Icon(
+                                Icons.extension_outlined,
+                                size: 18,
+                                color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
+                              ),
                               label: Text(
                                 l10n.artPuzzle,
                                 maxLines: 1,
                                 softWrap: false,
                                 overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  color: Color(0xFF1F1F1F),
+                                style: TextStyle(
+                                  color: isDark ? Colors.white : const Color(0xFF1F1F1F),
                                   fontWeight: FontWeight.w600,
                                 ),
                               ),
                               style: OutlinedButton.styleFrom(
-                                side: BorderSide(color: const Color(0xFF7B5E4B).withValues(alpha: 0.4)),
+                                side: BorderSide(
+                                  color: const Color(0xFF7B5E4B).withValues(alpha: isDark ? 0.8 : 0.4),
+                                ),
                                 padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 10),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(20),
@@ -1173,8 +1222,8 @@ class _GalleryTabState extends State<_GalleryTab> {
                                   maxLines: 1,
                                   softWrap: false,
                                   overflow: TextOverflow.ellipsis,
-                                  style: const TextStyle(
-                                    color: Color(0xFF1F1F1F),
+                                  style: TextStyle(
+                                    color: isDark ? Colors.white : const Color(0xFF1F1F1F),
                                     fontWeight: FontWeight.w600,
                                   ),
                                 ),
@@ -1216,12 +1265,14 @@ class _GalleryTabState extends State<_GalleryTab> {
                         prefixIcon: const Icon(Icons.search, size: 20),
                         border: OutlineInputBorder(
                           borderRadius: BorderRadius.circular(8),
-                          borderSide: BorderSide(color: Colors.grey.shade400),
+                          borderSide: BorderSide(
+                            color: isDark ? theme.colorScheme.outlineVariant : Colors.grey.shade400,
+                          ),
                         ),
                         contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                         isDense: true,
                         filled: true,
-                        fillColor: Colors.white,
+                        fillColor: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white,
                       ),
                     ),
                   ),
@@ -1229,18 +1280,26 @@ class _GalleryTabState extends State<_GalleryTab> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade400),
+                        border: Border.all(
+                          color: isDark ? theme.colorScheme.outlineVariant : Colors.grey.shade400,
+                        ),
                         borderRadius: BorderRadius.circular(8),
-                        color: Colors.white,
+                        color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white,
                       ),
                       child: DropdownButton<String>(
                         value: _selectedTechnique,
                         isDense: true,
+                        dropdownColor: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white,
                         items: techniques
                             .map(
                               (t) => DropdownMenuItem(
                                 value: t,
-                                child: Text(t == 'All' ? l10n.allTechniques : t),
+                                child: Text(
+                                  t == 'All' ? l10n.allTechniques : t,
+                                  style: TextStyle(
+                                    color: isDark ? Colors.white : Colors.black87,
+                                  ),
+                                ),
                               ),
                             )
                             .toList(),
@@ -1253,18 +1312,26 @@ class _GalleryTabState extends State<_GalleryTab> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                       decoration: BoxDecoration(
-                        border: Border.all(color: Colors.grey.shade400),
+                        border: Border.all(
+                          color: isDark ? theme.colorScheme.outlineVariant : Colors.grey.shade400,
+                        ),
                         borderRadius: BorderRadius.circular(8),
-                        color: Colors.white,
+                        color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white,
                       ),
                       child: DropdownButton<String>(
                         value: _selectedYear,
                         isDense: true,
+                        dropdownColor: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white,
                         items: years
                             .map(
                               (y) => DropdownMenuItem(
                                 value: y,
-                                child: Text(y == 'All' ? l10n.allYears : y),
+                                child: Text(
+                                  y == 'All' ? l10n.allYears : y,
+                                  style: TextStyle(
+                                    color: isDark ? Colors.white : Colors.black87,
+                                  ),
+                                ),
                               ),
                             )
                             .toList(),
@@ -1283,7 +1350,7 @@ class _GalleryTabState extends State<_GalleryTab> {
                           size: 16,
                           color: _onlyFavorites
                               ? const Color(0xFFD64550)
-                              : Colors.grey.shade700,
+                              : (isDark ? Colors.white60 : Colors.grey.shade700),
                         ),
                         const SizedBox(width: 6),
                         Text(
@@ -1291,7 +1358,7 @@ class _GalleryTabState extends State<_GalleryTab> {
                           style: TextStyle(
                             color: _onlyFavorites
                                 ? const Color(0xFFD64550)
-                                : const Color(0xFF1F1F1F),
+                                : (isDark ? Colors.white : const Color(0xFF1F1F1F)),
                             fontWeight: _onlyFavorites
                                 ? FontWeight.w600
                                 : FontWeight.normal,
@@ -1303,12 +1370,12 @@ class _GalleryTabState extends State<_GalleryTab> {
                       HapticFeedback.lightImpact();
                       setState(() => _onlyFavorites = selected);
                     },
-                    backgroundColor: Colors.white,
+                    backgroundColor: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white,
                     selectedColor: const Color(0xFFD64550).withValues(alpha: 0.08),
                     side: BorderSide(
                       color: _onlyFavorites
                           ? const Color(0xFFD64550)
-                          : Colors.grey.shade400,
+                          : (isDark ? theme.colorScheme.outlineVariant : Colors.grey.shade400),
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
@@ -1380,7 +1447,7 @@ class _GalleryTabState extends State<_GalleryTab> {
                                 style: TextStyle(
                                   color: _onlyFavorites
                                       ? const Color(0xFF7B5E4B)
-                                      : Colors.grey.shade700,
+                                      : (isDark ? Colors.white70 : Colors.grey.shade700),
                                   fontSize: 15,
                                   height: 1.5,
                                 ),
@@ -1452,6 +1519,8 @@ class _TimelineViewState extends State<_TimelineView> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final localeCode = Localizations.localeOf(context).languageCode;
     final screenWidth = MediaQuery.of(context).size.width;
     final isDesktop = screenWidth >= 768;
@@ -1478,7 +1547,7 @@ class _TimelineViewState extends State<_TimelineView> {
             l10n.noArtworksFound,
             textAlign: TextAlign.center,
             style: TextStyle(
-              color: Colors.grey.shade700,
+              color: isDark ? Colors.white70 : Colors.grey.shade700,
               fontSize: 15,
             ),
           ),
@@ -1493,10 +1562,12 @@ class _TimelineViewState extends State<_TimelineView> {
         Container(
           padding: const EdgeInsets.all(16),
           decoration: BoxDecoration(
-            color: const Color(0xFFFAF9F6),
+            color: isDark ? theme.colorScheme.surfaceContainerHigh : const Color(0xFFFAF9F6),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: const Color(0xFF7B5E4B).withValues(alpha: 0.12),
+              color: isDark
+                  ? theme.colorScheme.outlineVariant
+                  : const Color(0xFF7B5E4B).withValues(alpha: 0.12),
             ),
           ),
           child: Column(
@@ -1507,18 +1578,18 @@ class _TimelineViewState extends State<_TimelineView> {
                 children: [
                   Row(
                     children: [
-                      const Icon(
+                      Icon(
                         Icons.history_edu_rounded,
                         size: 20,
-                        color: Color(0xFF7B5E4B),
+                        color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
                       ),
                       const SizedBox(width: 8),
                       Text(
                         l10n.creativeJourney,
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF1F1F1F),
+                          color: isDark ? Colors.white : const Color(0xFF1F1F1F),
                         ),
                       ),
                     ],
@@ -1539,17 +1610,17 @@ class _TimelineViewState extends State<_TimelineView> {
                                 ? Icons.south_rounded
                                 : Icons.north_rounded,
                             size: 14,
-                            color: const Color(0xFF7B5E4B),
+                            color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
                           ),
                           const SizedBox(width: 4),
                           Text(
                             _descending
                                 ? '${sortedYears.first} → ${sortedYears.last}'
                                 : '${sortedYears.first} → ${sortedYears.last}',
-                            style: const TextStyle(
+                            style: TextStyle(
                               fontSize: 12,
                               fontWeight: FontWeight.w500,
-                              color: Color(0xFF7B5E4B),
+                              color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
                             ),
                           ),
                         ],
@@ -1584,11 +1655,12 @@ class _TimelineViewState extends State<_TimelineView> {
                           padding: const EdgeInsets.symmetric(
                               horizontal: 12, vertical: 6),
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: isDark ? theme.colorScheme.surfaceContainer : Colors.white,
                             borderRadius: BorderRadius.circular(16),
                             border: Border.all(
-                              color: const Color(0xFF7B5E4B)
-                                  .withValues(alpha: 0.2),
+                              color: isDark
+                                  ? theme.colorScheme.outlineVariant
+                                  : const Color(0xFF7B5E4B).withValues(alpha: 0.2),
                             ),
                           ),
                           child: Row(
@@ -1596,10 +1668,10 @@ class _TimelineViewState extends State<_TimelineView> {
                             children: [
                               Text(
                                 '$yr',
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 13,
                                   fontWeight: FontWeight.w600,
-                                  color: Color(0xFF7B5E4B),
+                                  color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
                                 ),
                               ),
                               const SizedBox(width: 6),
@@ -1607,7 +1679,7 @@ class _TimelineViewState extends State<_TimelineView> {
                                 padding: const EdgeInsets.symmetric(
                                     horizontal: 6, vertical: 2),
                                 decoration: BoxDecoration(
-                                  color: const Color(0xFF7B5E4B),
+                                  color: isDark ? theme.colorScheme.primary : const Color(0xFF7B5E4B),
                                   borderRadius: BorderRadius.circular(10),
                                 ),
                                 child: Text(
@@ -1673,7 +1745,7 @@ class _TimelineViewState extends State<_TimelineView> {
                             width: isDesktop ? 48 : 32,
                             height: isDesktop ? 48 : 32,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF7B5E4B),
+                              color: isDark ? theme.colorScheme.primary : const Color(0xFF7B5E4B),
                               shape: BoxShape.circle,
                               border: Border.all(
                                 color: const Color(0xFFD6B9A5),
@@ -1707,7 +1779,7 @@ class _TimelineViewState extends State<_TimelineView> {
                                   style: TextStyle(
                                     fontSize: isDesktop ? 26 : 20,
                                     fontWeight: FontWeight.bold,
-                                    color: const Color(0xFF1F1F1F),
+                                    color: isDark ? Colors.white : const Color(0xFF1F1F1F),
                                     letterSpacing: -0.5,
                                   ),
                                 ),
@@ -1725,10 +1797,10 @@ class _TimelineViewState extends State<_TimelineView> {
                                   ),
                                   child: Text(
                                     l10n.artworksCount(yearArtworks.length),
-                                    style: const TextStyle(
+                                    style: TextStyle(
                                       fontSize: 12,
                                       fontWeight: FontWeight.w600,
-                                      color: Color(0xFF7B5E4B),
+                                      color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
                                     ),
                                   ),
                                 ),
@@ -1738,7 +1810,7 @@ class _TimelineViewState extends State<_TimelineView> {
                                     style: TextStyle(
                                       fontSize: 13,
                                       fontStyle: FontStyle.italic,
-                                      color: Colors.grey.shade600,
+                                      color: isDark ? Colors.white60 : Colors.grey.shade600,
                                     ),
                                   ),
                               ],
@@ -1798,6 +1870,7 @@ class _EditorialTimelineCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final title = artwork.localizedTitle(localeCode);
     final desc = artwork.localizedDescription(localeCode);
 
@@ -1809,10 +1882,10 @@ class _EditorialTimelineCard extends StatelessWidget {
       borderRadius: BorderRadius.circular(8),
       child: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: Colors.black.withValues(alpha: 0.08),
+            color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.08),
           ),
           boxShadow: [
             BoxShadow(
@@ -1836,7 +1909,7 @@ class _EditorialTimelineCard extends StatelessWidget {
                         Positioned.fill(
                           child: Container(
                             padding: const EdgeInsets.all(6),
-                            color: const Color(0xFFFAF9F6),
+                            color: isDark ? theme.colorScheme.surfaceContainer : const Color(0xFFFAF9F6),
                             child: artwork.imageUrl.isNotEmpty
                                 ? Image.network(
                                     artwork.imageUrl,
@@ -1872,7 +1945,7 @@ class _EditorialTimelineCard extends StatelessWidget {
                                   title,
                                   style: theme.textTheme.titleMedium?.copyWith(
                                     fontWeight: FontWeight.w600,
-                                    color: const Color(0xFF1F1F1F),
+                                    color: isDark ? Colors.white : const Color(0xFF1F1F1F),
                                   ),
                                   maxLines: 1,
                                   overflow: TextOverflow.ellipsis,
@@ -1912,7 +1985,7 @@ class _EditorialTimelineCard extends StatelessWidget {
                             Text(
                               desc,
                               style: theme.textTheme.bodySmall?.copyWith(
-                                color: Colors.black87,
+                                color: isDark ? Colors.white70 : Colors.black87,
                                 height: 1.4,
                               ),
                               maxLines: 3,
@@ -1924,17 +1997,17 @@ class _EditorialTimelineCard extends StatelessWidget {
                             children: [
                               Text(
                                 AppLocalizations.of(context)!.viewDetails,
-                                style: const TextStyle(
+                                style: TextStyle(
                                   fontSize: 12,
                                   fontWeight: FontWeight.w600,
-                                  color: Color(0xFF7B5E4B),
+                                  color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
                                 ),
                               ),
                               const SizedBox(width: 4),
-                              const Icon(
+                              Icon(
                                 Icons.arrow_forward_rounded,
                                 size: 14,
-                                color: Color(0xFF7B5E4B),
+                                color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
                               ),
                             ],
                           ),
@@ -1955,7 +2028,7 @@ class _EditorialTimelineCard extends StatelessWidget {
                         Positioned.fill(
                           child: Container(
                             padding: const EdgeInsets.all(6),
-                            color: const Color(0xFFFAF9F6),
+                            color: isDark ? theme.colorScheme.surfaceContainer : const Color(0xFFFAF9F6),
                             child: artwork.imageUrl.isNotEmpty
                                 ? Image.network(
                                     artwork.imageUrl,
@@ -2006,7 +2079,7 @@ class _EditorialTimelineCard extends StatelessWidget {
                           title,
                           style: theme.textTheme.titleMedium?.copyWith(
                             fontWeight: FontWeight.w600,
-                            color: const Color(0xFF1F1F1F),
+                            color: isDark ? Colors.white : const Color(0xFF1F1F1F),
                           ),
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -2015,7 +2088,7 @@ class _EditorialTimelineCard extends StatelessWidget {
                         Text(
                           '${artwork.technique} • ${artwork.dimensions}',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: const Color(0xFF7B5E4B),
+                            color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
                             fontWeight: FontWeight.w500,
                           ),
                           maxLines: 1,
@@ -2026,7 +2099,7 @@ class _EditorialTimelineCard extends StatelessWidget {
                           Text(
                             desc,
                             style: theme.textTheme.bodySmall?.copyWith(
-                              color: Colors.black87,
+                              color: isDark ? Colors.white70 : Colors.black87,
                               height: 1.4,
                             ),
                             maxLines: 2,
@@ -2057,9 +2130,11 @@ class _FavoriteHeartButton extends StatelessWidget {
   Widget build(BuildContext context) {
     final isFav = dataController.isFavorite(artworkId);
     final l10n = AppLocalizations.of(context)!;
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return Material(
-      color: Colors.white.withValues(alpha: 0.85),
+      color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white.withValues(alpha: 0.85),
       shape: const CircleBorder(),
       elevation: 2,
       shadowColor: Colors.black.withValues(alpha: 0.12),
@@ -2076,7 +2151,7 @@ class _FavoriteHeartButton extends StatelessWidget {
             child: Icon(
               isFav ? Icons.favorite : Icons.favorite_border,
               size: 16,
-              color: isFav ? const Color(0xFFD64550) : Colors.black45,
+              color: isFav ? const Color(0xFFD64550) : (isDark ? Colors.white70 : Colors.black45),
             ),
           ),
         ),
@@ -2102,6 +2177,7 @@ class _FramedArtworkCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return InkWell(
       onTap: onTap,
@@ -2117,9 +2193,9 @@ class _FramedArtworkCard extends StatelessWidget {
                   height: double.infinity,
                   padding: const EdgeInsets.all(8),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white,
                     border: Border.all(
-                      color: Colors.black.withValues(alpha: 0.08),
+                      color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.08),
                       width: 1,
                     ),
                     boxShadow: [
@@ -2203,9 +2279,12 @@ class _ArtworkDetailDialogState extends State<_ArtworkDetailDialog> {
   }
 
   Widget _buildModeToggle(AppLocalizations l10n) {
+    final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
+
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFFEFECE6),
+        color: isDark ? theme.colorScheme.surfaceContainerHigh : const Color(0xFFEFECE6),
         borderRadius: BorderRadius.circular(20),
       ),
       padding: const EdgeInsets.all(3),
@@ -2221,7 +2300,9 @@ class _ArtworkDetailDialogState extends State<_ArtworkDetailDialog> {
                 vertical: 6,
               ),
               decoration: BoxDecoration(
-                color: _activeTab == 0 ? Colors.white : Colors.transparent,
+                color: _activeTab == 0
+                    ? (isDark ? theme.colorScheme.surfaceContainerHighest : Colors.white)
+                    : Colors.transparent,
                 borderRadius: BorderRadius.circular(18),
                 boxShadow: _activeTab == 0
                     ? [
@@ -2238,8 +2319,8 @@ class _ArtworkDetailDialogState extends State<_ArtworkDetailDialog> {
                     Icons.image_outlined,
                     size: 15,
                     color: _activeTab == 0
-                        ? const Color(0xFF7B5E4B)
-                        : Colors.grey.shade700,
+                        ? (isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B))
+                        : (isDark ? Colors.white70 : Colors.grey.shade700),
                   ),
                   const SizedBox(width: 5),
                   Text(
@@ -2250,8 +2331,8 @@ class _ArtworkDetailDialogState extends State<_ArtworkDetailDialog> {
                           ? FontWeight.w600
                           : FontWeight.normal,
                       color: _activeTab == 0
-                          ? const Color(0xFF7B5E4B)
-                          : Colors.grey.shade700,
+                          ? (isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B))
+                          : (isDark ? Colors.white70 : Colors.grey.shade700),
                     ),
                   ),
                 ],
@@ -2267,7 +2348,9 @@ class _ArtworkDetailDialogState extends State<_ArtworkDetailDialog> {
                 vertical: 6,
               ),
               decoration: BoxDecoration(
-                color: _activeTab == 1 ? Colors.white : Colors.transparent,
+                color: _activeTab == 1
+                    ? (isDark ? theme.colorScheme.surfaceContainerHighest : Colors.white)
+                    : Colors.transparent,
                 borderRadius: BorderRadius.circular(18),
                 boxShadow: _activeTab == 1
                     ? [
@@ -2284,8 +2367,8 @@ class _ArtworkDetailDialogState extends State<_ArtworkDetailDialog> {
                     Icons.balcony_outlined,
                     size: 15,
                     color: _activeTab == 1
-                        ? const Color(0xFF7B5E4B)
-                        : Colors.grey.shade700,
+                        ? (isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B))
+                        : (isDark ? Colors.white70 : Colors.grey.shade700),
                   ),
                   const SizedBox(width: 5),
                   Text(
@@ -2296,8 +2379,8 @@ class _ArtworkDetailDialogState extends State<_ArtworkDetailDialog> {
                           ? FontWeight.w600
                           : FontWeight.normal,
                       color: _activeTab == 1
-                          ? const Color(0xFF7B5E4B)
-                          : Colors.grey.shade700,
+                          ? (isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B))
+                          : (isDark ? Colors.white70 : Colors.grey.shade700),
                     ),
                   ),
                 ],
@@ -2313,6 +2396,7 @@ class _ArtworkDetailDialogState extends State<_ArtworkDetailDialog> {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
     final localeCode = Localizations.localeOf(context).languageCode;
     final size = MediaQuery.of(context).size;
     final artwork = widget.artworks[_currentIndex];
@@ -2324,7 +2408,7 @@ class _ArtworkDetailDialogState extends State<_ArtworkDetailDialog> {
         final isFavorite = widget.dataController.isFavorite(artwork.id);
 
         return Dialog(
-          backgroundColor: const Color(0xFFFAF9F6),
+          backgroundColor: isDark ? theme.colorScheme.surface : const Color(0xFFFAF9F6),
           insetPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 20),
           child: Container(
             width: size.width > 900 ? 840 : size.width * 0.95,
@@ -2923,7 +3007,12 @@ class _ArtworkCommentsSectionState extends State<_ArtworkCommentsSection> {
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 child: Text(
                   l10n.noCommentsYet,
-                  style: TextStyle(color: Colors.grey.shade600, fontSize: 13),
+                  style: TextStyle(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? Colors.white70
+                        : Colors.grey.shade600,
+                    fontSize: 13,
+                  ),
                 ),
               )
             : ListView.separated(
@@ -2933,13 +3022,15 @@ class _ArtworkCommentsSectionState extends State<_ArtworkCommentsSection> {
                 separatorBuilder: (_, __) => const SizedBox(height: 10),
                 itemBuilder: (context, index) {
                   final comment = approvedComments[index];
+                  final isDark = Theme.of(context).brightness == Brightness.dark;
                   return Container(
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
-                      color: Colors.white,
+                      color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white,
                       borderRadius: BorderRadius.circular(8),
                       border: Border.all(
-                          color: Colors.black.withValues(alpha: 0.06)),
+                        color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.06),
+                      ),
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
@@ -2949,17 +3040,17 @@ class _ArtworkCommentsSectionState extends State<_ArtworkCommentsSection> {
                           children: [
                             Text(
                               comment.authorName,
-                              style: const TextStyle(
+                              style: TextStyle(
                                 fontWeight: FontWeight.w600,
                                 fontSize: 13,
-                                color: Color(0xFF2B2B2B),
+                                color: isDark ? Colors.white : const Color(0xFF2B2B2B),
                               ),
                             ),
                             Text(
                               '${comment.createdAt.day}.${comment.createdAt.month}.${comment.createdAt.year}',
                               style: TextStyle(
                                 fontSize: 11,
-                                color: Colors.grey.shade500,
+                                color: isDark ? Colors.white60 : Colors.grey.shade500,
                               ),
                             ),
                           ],
@@ -2967,7 +3058,11 @@ class _ArtworkCommentsSectionState extends State<_ArtworkCommentsSection> {
                         const SizedBox(height: 6),
                         Text(
                           comment.commentText,
-                          style: const TextStyle(fontSize: 13, height: 1.4),
+                          style: TextStyle(
+                            fontSize: 13,
+                            height: 1.4,
+                            color: isDark ? Colors.white70 : Colors.black87,
+                          ),
                         ),
                       ],
                     ),
@@ -2976,72 +3071,77 @@ class _ArtworkCommentsSectionState extends State<_ArtworkCommentsSection> {
               ),
         const SizedBox(height: 20),
         // Comment submission form
-        Container(
-          padding: const EdgeInsets.all(16),
-          decoration: BoxDecoration(
-            color: Colors.white.withValues(alpha: 0.8),
-            borderRadius: BorderRadius.circular(10),
-            border: Border.all(color: Colors.black.withValues(alpha: 0.08)),
-          ),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                l10n.leaveComment,
-                style: theme.textTheme.titleSmall?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+        Builder(builder: (context) {
+          final isDark = Theme.of(context).brightness == Brightness.dark;
+          return Container(
+            padding: const EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white.withValues(alpha: 0.8),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(
+                color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.08),
               ),
-              const SizedBox(height: 12),
-              TextField(
-                controller: _nameController,
-                decoration: InputDecoration(
-                  labelText: l10n.authorName,
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                  isDense: true,
-                  filled: true,
-                  fillColor: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 10),
-              TextField(
-                controller: _commentController,
-                maxLines: 3,
-                decoration: InputDecoration(
-                  labelText: l10n.commentText,
-                  border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8)),
-                  filled: true,
-                  fillColor: Colors.white,
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _isSubmitting ? null : _submit,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF7B5E4B),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(8),
-                    ),
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.leaveComment,
+                  style: theme.textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
                   ),
-                  child: _isSubmitting
-                      ? const SizedBox(
-                          width: 18,
-                          height: 18,
-                          child: CircularProgressIndicator(
-                              strokeWidth: 2, color: Colors.white),
-                        )
-                      : Text(l10n.submit),
                 ),
-              ),
-            ],
-          ),
-        ),
+                const SizedBox(height: 12),
+                TextField(
+                  controller: _nameController,
+                  decoration: InputDecoration(
+                    labelText: l10n.authorName,
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                    isDense: true,
+                    filled: true,
+                    fillColor: isDark ? theme.colorScheme.surfaceContainer : Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 10),
+                TextField(
+                  controller: _commentController,
+                  maxLines: 3,
+                  decoration: InputDecoration(
+                    labelText: l10n.commentText,
+                    border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(8)),
+                    filled: true,
+                    fillColor: isDark ? theme.colorScheme.surfaceContainer : Colors.white,
+                  ),
+                ),
+                const SizedBox(height: 12),
+                SizedBox(
+                  width: double.infinity,
+                  child: ElevatedButton(
+                    onPressed: _isSubmitting ? null : _submit,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF7B5E4B),
+                      foregroundColor: Colors.white,
+                      padding: const EdgeInsets.symmetric(vertical: 12),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                    ),
+                    child: _isSubmitting
+                        ? const SizedBox(
+                            width: 18,
+                            height: 18,
+                            child: CircularProgressIndicator(
+                                strokeWidth: 2, color: Colors.white),
+                          )
+                        : Text(l10n.submit),
+                  ),
+                ),
+              ],
+            ),
+          );
+        }),
       ],
     );
   }
@@ -3058,6 +3158,7 @@ class _AboutArtistTab extends StatelessWidget {
     final l10n = AppLocalizations.of(context)!;
     final localeCode = Localizations.localeOf(context).languageCode;
     final theme = Theme.of(context);
+    final isDark = theme.brightness == Brightness.dark;
 
     return SingleChildScrollView(
       padding: const EdgeInsets.all(32.0),
@@ -3066,9 +3167,11 @@ class _AboutArtistTab extends StatelessWidget {
           constraints: const BoxConstraints(maxWidth: 680),
           child: Card(
             elevation: 0,
-            color: Colors.white.withValues(alpha: 0.9),
+            color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white.withValues(alpha: 0.9),
             shape: RoundedRectangleBorder(
-              side: BorderSide(color: Colors.black.withValues(alpha: 0.08)),
+              side: BorderSide(
+                color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.08),
+              ),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Padding(
@@ -3081,10 +3184,10 @@ class _AboutArtistTab extends StatelessWidget {
                       Container(
                         padding: const EdgeInsets.all(6),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFFCF7EA),
+                          color: isDark ? theme.colorScheme.surfaceContainerHighest : const Color(0xFFFCF7EA),
                           borderRadius: BorderRadius.circular(12),
                           border: Border.all(
-                            color: Colors.black.withValues(alpha: 0.08),
+                            color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.08),
                           ),
                         ),
                         child: ClipRRect(
@@ -3094,10 +3197,14 @@ class _AboutArtistTab extends StatelessWidget {
                             height: 48,
                             fit: BoxFit.contain,
                             errorBuilder: (context, error, stackTrace) =>
-                                const CircleAvatar(
+                                CircleAvatar(
                               radius: 24,
-                              backgroundColor: Color(0xFFE7DFD5),
-                              child: Icon(Icons.brush, size: 24, color: Color(0xFF5D4B3E)),
+                              backgroundColor: isDark ? theme.colorScheme.surfaceContainer : const Color(0xFFE7DFD5),
+                              child: Icon(
+                                Icons.brush,
+                                size: 24,
+                                color: isDark ? theme.colorScheme.onSurface : const Color(0xFF5D4B3E),
+                              ),
                             ),
                           ),
                         ),
@@ -3321,192 +3428,202 @@ class _GuestbookTabState extends State<_GuestbookTab> {
       child: Center(
         child: ConstrainedBox(
           constraints: const BoxConstraints(maxWidth: 680),
-          child: Column(
-            children: [
-              Card(
-                elevation: 0,
-                color: Colors.white.withValues(alpha: 0.9),
-                shape: RoundedRectangleBorder(
-                  side: BorderSide(color: Colors.black.withValues(alpha: 0.08)),
-                  borderRadius: BorderRadius.circular(8),
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.all(32.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        l10n.leaveAMessage,
-                        style: theme.textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      // Hidden honeypot field to trap bots
-                      Offstage(
-                        offstage: true,
-                        child: TextFormField(
-                          controller: _honeypotController,
-                          decoration: const InputDecoration(
-                            labelText: 'Website (leave blank)',
-                          ),
-                        ),
-                      ),
-                      TextField(
-                        controller: _nameController,
-                        decoration: InputDecoration(
-                          labelText: l10n.authorName,
-                          border: const OutlineInputBorder(),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      TextField(
-                        controller: _messageController,
-                        maxLines: 4,
-                        decoration: InputDecoration(
-                          labelText: l10n.message,
-                          border: const OutlineInputBorder(),
-                        ),
-                      ),
-                      const SizedBox(height: 16),
-                      // Math CAPTCHA verification challenge
-                      Row(
-                        children: [
-                          Expanded(
-                            child: Text(
-                              l10n.captchaQuestion(_captchaA, _captchaB),
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                fontWeight: FontWeight.w600,
-                                color: const Color(0xFF7B5E4B),
-                              ),
-                            ),
-                          ),
-                          IconButton(
-                            icon: const Icon(Icons.refresh, size: 20),
-                            tooltip: l10n.refresh,
-                            onPressed: _generateCaptcha,
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      TextField(
-                        controller: _captchaController,
-                        keyboardType: TextInputType.number,
-                        decoration: InputDecoration(
-                          labelText: l10n.captchaAnswerHint,
-                          border: const OutlineInputBorder(),
-                        ),
-                      ),
-                      const SizedBox(height: 24),
-                      SizedBox(
-                        width: double.infinity,
-                        child: ElevatedButton.icon(
-                          onPressed:
-                              _isSubmitting ? null : () => _submitMessage(l10n),
-                          icon: _isSubmitting
-                              ? const SizedBox(
-                                  width: 18,
-                                  height: 18,
-                                  child: CircularProgressIndicator(strokeWidth: 2),
-                                )
-                              : const Icon(Icons.send_outlined, size: 18),
-                          label: Text(l10n.submit),
-                          style: ElevatedButton.styleFrom(
-                            padding: const EdgeInsets.symmetric(vertical: 16),
-                            backgroundColor: const Color(0xFF7B5E4B),
-                            foregroundColor: Colors.white,
-                          ),
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 32),
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Text(
-                  l10n.approvedMessages,
-                  style: theme.textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              if (approvedEntries.isEmpty)
+          child: Builder(builder: (context) {
+            final isDark = theme.brightness == Brightness.dark;
+            return Column(
+              children: [
                 Card(
                   elevation: 0,
-                  color: Colors.white.withValues(alpha: 0.85),
+                  color: isDark ? theme.colorScheme.surfaceContainerHigh : Colors.white.withValues(alpha: 0.9),
                   shape: RoundedRectangleBorder(
-                    side: BorderSide(color: Colors.black.withValues(alpha: 0.06)),
-                    borderRadius: BorderRadius.circular(6),
+                    side: BorderSide(
+                      color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.08),
+                    ),
+                    borderRadius: BorderRadius.circular(8),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.all(24.0),
-                    child: Center(
-                      child: Text(
-                        l10n.noApprovedGuestbookEntries,
-                        style: theme.textTheme.bodyMedium?.copyWith(
-                          color: Colors.grey.shade700,
+                    padding: const EdgeInsets.all(32.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          l10n.leaveAMessage,
+                          style: theme.textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
-                  ),
-                )
-              else
-                ListView.separated(
-                  shrinkWrap: true,
-                  physics: const NeverScrollableScrollPhysics(),
-                  itemCount: approvedEntries.length,
-                  separatorBuilder: (context, index) => const SizedBox(height: 12),
-                  itemBuilder: (context, index) {
-                    final item = approvedEntries[index];
-                    return Card(
-                      elevation: 0,
-                      color: Colors.white.withValues(alpha: 0.85),
-                      shape: RoundedRectangleBorder(
-                        side: BorderSide(color: Colors.black.withValues(alpha: 0.06)),
-                        borderRadius: BorderRadius.circular(6),
-                      ),
-                      child: Padding(
-                        padding: const EdgeInsets.all(16.0),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                Text(
-                                  item.authorName,
-                                  style: const TextStyle(
-                                    fontWeight: FontWeight.w600,
-                                    fontSize: 15,
-                                  ),
-                                ),
-                                Text(
-                                  '${item.createdAt.year}-${item.createdAt.month.toString().padLeft(2, '0')}-${item.createdAt.day.toString().padLeft(2, '0')}',
-                                  style: theme.textTheme.bodySmall?.copyWith(
-                                    color: Colors.grey.shade600,
-                                  ),
-                                ),
-                              ],
+                        const SizedBox(height: 20),
+                        // Hidden honeypot field to trap bots
+                        Offstage(
+                          offstage: true,
+                          child: TextFormField(
+                            controller: _honeypotController,
+                            decoration: const InputDecoration(
+                              labelText: 'Website (leave blank)',
                             ),
-                            const SizedBox(height: 8),
-                            Text(
-                              item.message,
-                              style: theme.textTheme.bodyMedium?.copyWith(
-                                height: 1.4,
+                          ),
+                        ),
+                        TextField(
+                          controller: _nameController,
+                          decoration: InputDecoration(
+                            labelText: l10n.authorName,
+                            border: const OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        TextField(
+                          controller: _messageController,
+                          maxLines: 4,
+                          decoration: InputDecoration(
+                            labelText: l10n.message,
+                            border: const OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 16),
+                        // Math CAPTCHA verification challenge
+                        Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                l10n.captchaQuestion(_captchaA, _captchaB),
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  fontWeight: FontWeight.w600,
+                                  color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
+                                ),
                               ),
+                            ),
+                            IconButton(
+                              icon: const Icon(Icons.refresh, size: 20),
+                              tooltip: l10n.refresh,
+                              onPressed: _generateCaptcha,
                             ),
                           ],
                         ),
-                      ),
-                    );
-                  },
+                        const SizedBox(height: 8),
+                        TextField(
+                          controller: _captchaController,
+                          keyboardType: TextInputType.number,
+                          decoration: InputDecoration(
+                            labelText: l10n.captchaAnswerHint,
+                            border: const OutlineInputBorder(),
+                          ),
+                        ),
+                        const SizedBox(height: 24),
+                        SizedBox(
+                          width: double.infinity,
+                          child: ElevatedButton.icon(
+                            onPressed:
+                                _isSubmitting ? null : () => _submitMessage(l10n),
+                            icon: _isSubmitting
+                                ? const SizedBox(
+                                    width: 18,
+                                    height: 18,
+                                    child: CircularProgressIndicator(strokeWidth: 2),
+                                  )
+                                : const Icon(Icons.send_outlined, size: 18),
+                            label: Text(l10n.submit),
+                            style: ElevatedButton.styleFrom(
+                              padding: const EdgeInsets.symmetric(vertical: 16),
+                              backgroundColor: const Color(0xFF7B5E4B),
+                              foregroundColor: Colors.white,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
-            ],
-          ),
+                const SizedBox(height: 32),
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: Text(
+                    l10n.approvedMessages,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ),
+                const SizedBox(height: 12),
+                if (approvedEntries.isEmpty)
+                  Card(
+                    elevation: 0,
+                    color: isDark ? theme.colorScheme.surfaceContainer : Colors.white.withValues(alpha: 0.85),
+                    shape: RoundedRectangleBorder(
+                      side: BorderSide(
+                        color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.06),
+                      ),
+                      borderRadius: BorderRadius.circular(6),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.all(24.0),
+                      child: Center(
+                        child: Text(
+                          l10n.noApprovedGuestbookEntries,
+                          style: theme.textTheme.bodyMedium?.copyWith(
+                            color: isDark ? Colors.white70 : Colors.grey.shade700,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                    ),
+                  )
+                else
+                  ListView.separated(
+                    shrinkWrap: true,
+                    physics: const NeverScrollableScrollPhysics(),
+                    itemCount: approvedEntries.length,
+                    separatorBuilder: (context, index) => const SizedBox(height: 12),
+                    itemBuilder: (context, index) {
+                      final item = approvedEntries[index];
+                      return Card(
+                        elevation: 0,
+                        color: isDark ? theme.colorScheme.surfaceContainer : Colors.white.withValues(alpha: 0.85),
+                        shape: RoundedRectangleBorder(
+                          side: BorderSide(
+                            color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.06),
+                          ),
+                          borderRadius: BorderRadius.circular(6),
+                        ),
+                        child: Padding(
+                          padding: const EdgeInsets.all(16.0),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                children: [
+                                  Text(
+                                    item.authorName,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 15,
+                                      color: isDark ? Colors.white : Colors.black87,
+                                    ),
+                                  ),
+                                  Text(
+                                    '${item.createdAt.year}-${item.createdAt.month.toString().padLeft(2, '0')}-${item.createdAt.day.toString().padLeft(2, '0')}',
+                                    style: theme.textTheme.bodySmall?.copyWith(
+                                      color: isDark ? Colors.white60 : Colors.grey.shade600,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 8),
+                              Text(
+                                item.message,
+                                style: theme.textTheme.bodyMedium?.copyWith(
+                                  height: 1.4,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      );
+                    },
+                  ),
+              ],
+            );
+          }),
         ),
       ),
     );
