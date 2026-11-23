@@ -50,7 +50,7 @@ class AtelierGalleryApp extends StatelessWidget {
       listenable: localeController,
       builder: (context, _) {
         return MaterialApp(
-          title: 'Atelier Gallery',
+          title: 'IriArt',
           debugShowCheckedModeBanner: false,
           locale: localeController.locale,
           supportedLocales: AppLocalizations.supportedLocales,

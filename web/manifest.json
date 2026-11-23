@@ -1,6 +1,6 @@
 {
-    "name": "Atelier Gallery - IriArt",
-    "short_name": "Atelier Gallery",
+    "name": "IriArt",
+    "short_name": "IriArt",
     "start_url": ".",
     "display": "standalone",
     "background_color": "#FCF7EA",
