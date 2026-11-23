@@ -494,7 +494,7 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                                   localeCode: localeCode,
                                 ),
                                 const SizedBox(height: 14),
-                                _buildFooterControls(l10n),
+                                _buildFooterControls(l10n, isCompact),
                               ],
                             )
                           : Row(
@@ -515,7 +515,7 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
                                         localeCode: localeCode,
                                       ),
                                       const SizedBox(height: 14),
-                                      _buildFooterControls(l10n),
+                                      _buildFooterControls(l10n, isCompact),
                                     ],
                                   ),
                                 ),
@@ -553,6 +553,66 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
   ) {
     final width = MediaQuery.of(context).size.width;
     final isMedium = width < 900;
+
+    if (isCompact) {
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF7B5E4B).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Icon(
+                  Icons.extension_outlined,
+                  color: Color(0xFF7B5E4B),
+                  size: 16,
+                ),
+              ),
+              const SizedBox(width: 6),
+              Expanded(
+                child: Text(
+                  l10n.artPuzzle,
+                  overflow: TextOverflow.ellipsis,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF1F1F1F),
+                  ),
+                ),
+              ),
+              const SizedBox(width: 6),
+              _buildTabSwitcher(l10n, isCompact, isMedium),
+              const SizedBox(width: 4),
+              IconButton(
+                icon: const Icon(Icons.close, size: 20),
+                padding: const EdgeInsets.all(4),
+                constraints: const BoxConstraints(),
+                tooltip: l10n.close,
+                onPressed: () => Navigator.of(context).pop(),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Row(
+            children: [
+              Expanded(
+                child: _buildNicknameChip(l10n, isCompact, isMedium),
+              ),
+              if (widget.artworks.length > 1 && _currentTab == PuzzleDialogTab.game) ...[
+                const SizedBox(width: 8),
+                Expanded(
+                  child: _buildArtworkDropdown(l10n, localeCode, isCompact, isMedium),
+                ),
+              ],
+            ],
+          ),
+        ],
+      );
+    }
 
     return Row(
       children: [
@@ -764,7 +824,6 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
     bool isCompact,
     bool isMedium,
   ) {
-    final maxNickWidth = isCompact ? 60.0 : (isMedium ? 75.0 : 110.0);
     return InkWell(
       onTap: () async {
         final newNick = await _showNicknameInputDialog();
@@ -786,6 +845,7 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Icon(
               Icons.account_circle_outlined,
@@ -793,13 +853,13 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
               color: Color(0xFF7B5E4B),
             ),
             const SizedBox(width: 4),
-            ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: maxNickWidth),
+            Flexible(
               child: Text(
                 (_nickname != null && _nickname!.isNotEmpty)
                     ? _nickname!
                     : l10n.nickname,
                 overflow: TextOverflow.ellipsis,
+                maxLines: 1,
                 style: const TextStyle(
                   fontSize: 11,
                   fontWeight: FontWeight.bold,
@@ -821,7 +881,6 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
     bool isCompact,
     bool isMedium,
   ) {
-    final maxTitleWidth = isCompact ? 55.0 : (isMedium ? 70.0 : 120.0);
     return PopupMenuButton<ArtworkModel>(
       tooltip: l10n.chooseArtwork,
       initialValue: _selectedArtwork,
@@ -831,42 +890,6 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
           _initBoardAndShuffle();
         });
       },
-      child: Container(
-        padding: const EdgeInsets.symmetric(
-          horizontal: 8,
-          vertical: 5,
-        ),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border.all(color: Colors.grey.shade300),
-          borderRadius: BorderRadius.circular(20),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.collections_outlined,
-              size: 14,
-              color: Color(0xFF7B5E4B),
-            ),
-            const SizedBox(width: 4),
-            ConstrainedBox(
-              constraints: BoxConstraints(maxWidth: maxTitleWidth),
-              child: Text(
-                _selectedArtwork.localizedTitle(localeCode),
-                overflow: TextOverflow.ellipsis,
-                style: const TextStyle(
-                  fontSize: 11,
-                  fontWeight: FontWeight.w500,
-                  color: Color(0xFF1F1F1F),
-                ),
-              ),
-            ),
-            const SizedBox(width: 2),
-            const Icon(Icons.arrow_drop_down, size: 16, color: Colors.grey),
-          ],
-        ),
-      ),
       itemBuilder: (context) => widget.artworks.map((art) {
         final isCurrent = art.id == _selectedArtwork.id;
         return PopupMenuItem<ArtworkModel>(
@@ -902,6 +925,43 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
           ),
         );
       }).toList(),
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          horizontal: 8,
+          vertical: 5,
+        ),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            const Icon(
+              Icons.collections_outlined,
+              size: 14,
+              color: Color(0xFF7B5E4B),
+            ),
+            const SizedBox(width: 4),
+            Flexible(
+              child: Text(
+                _selectedArtwork.localizedTitle(localeCode),
+                overflow: TextOverflow.ellipsis,
+                maxLines: 1,
+                style: const TextStyle(
+                  fontSize: 11,
+                  fontWeight: FontWeight.w500,
+                  color: Color(0xFF1F1F1F),
+                ),
+              ),
+            ),
+            const SizedBox(width: 2),
+            const Icon(Icons.arrow_drop_down, size: 16, color: Colors.grey),
+          ],
+        ),
+      ),
     );
   }
 
@@ -1545,52 +1605,78 @@ class _ArtPuzzleDialogState extends State<ArtPuzzleDialog> {
     );
   }
 
-  Widget _buildFooterControls(AppLocalizations l10n) {
+  Widget _buildFooterControls(AppLocalizations l10n, bool isCompact) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.center,
       children: [
         // Peek / Preview Toggle Button
-        GestureDetector(
-          onTapDown: (_) => setState(() => _isPreviewing = true),
-          onTapUp: (_) => setState(() => _isPreviewing = false),
-          onTapCancel: () => setState(() => _isPreviewing = false),
-          child: OutlinedButton.icon(
-            onPressed: () {
-              setState(() => _isPreviewing = !_isPreviewing);
-            },
-            icon: Icon(
-              _isPreviewing ? Icons.visibility_off : Icons.visibility_outlined,
-              size: 16,
-            ),
-            label: Text(l10n.peekLabel),
-            style: OutlinedButton.styleFrom(
-              foregroundColor: _isPreviewing
-                  ? const Color(0xFF7B5E4B)
-                  : Colors.grey.shade800,
-              side: BorderSide(
-                color: _isPreviewing
-                    ? const Color(0xFF7B5E4B)
-                    : Colors.grey.shade400,
+        Expanded(
+          child: GestureDetector(
+            onTapDown: (_) => setState(() => _isPreviewing = true),
+            onTapUp: (_) => setState(() => _isPreviewing = false),
+            onTapCancel: () => setState(() => _isPreviewing = false),
+            child: OutlinedButton.icon(
+              onPressed: () {
+                setState(() => _isPreviewing = !_isPreviewing);
+              },
+              icon: Icon(
+                _isPreviewing ? Icons.visibility_off : Icons.visibility_outlined,
+                size: 15,
               ),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(20),
+              label: Text(
+                l10n.peekLabel,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: TextStyle(
+                  fontSize: isCompact ? 11 : 13,
+                ),
+              ),
+              style: OutlinedButton.styleFrom(
+                padding: EdgeInsets.symmetric(
+                  horizontal: isCompact ? 6 : 12,
+                  vertical: isCompact ? 8 : 10,
+                ),
+                foregroundColor: _isPreviewing
+                    ? const Color(0xFF7B5E4B)
+                    : Colors.grey.shade800,
+                side: BorderSide(
+                  color: _isPreviewing
+                      ? const Color(0xFF7B5E4B)
+                      : Colors.grey.shade400,
+                ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(20),
+                ),
               ),
             ),
           ),
         ),
 
-        const SizedBox(width: 12),
+        SizedBox(width: isCompact ? 8 : 12),
 
         // Shuffle / Restart Button
-        OutlinedButton.icon(
-          onPressed: _initBoardAndShuffle,
-          icon: const Icon(Icons.shuffle, size: 16),
-          label: Text(l10n.shuffleLabel),
-          style: OutlinedButton.styleFrom(
-            foregroundColor: const Color(0xFF1F1F1F),
-            side: BorderSide(color: Colors.grey.shade400),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(20),
+        Expanded(
+          child: OutlinedButton.icon(
+            onPressed: _initBoardAndShuffle,
+            icon: const Icon(Icons.shuffle, size: 15),
+            label: Text(
+              l10n.shuffleLabel,
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: isCompact ? 11 : 13,
+              ),
+            ),
+            style: OutlinedButton.styleFrom(
+              padding: EdgeInsets.symmetric(
+                horizontal: isCompact ? 6 : 12,
+                vertical: isCompact ? 8 : 10,
+              ),
+              foregroundColor: const Color(0xFF1F1F1F),
+              side: BorderSide(color: Colors.grey.shade400),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(20),
+              ),
             ),
           ),
         ),
