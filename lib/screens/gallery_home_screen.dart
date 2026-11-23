@@ -206,17 +206,37 @@ class _TopGalleryNavBar extends StatelessWidget {
                 child: Row(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    Image.asset(
-                      'assets/branding/logo_iriart.png',
-                      height: isDesktop ? 30 : 24,
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        return Icon(
-                          Icons.palette_outlined,
-                          size: 24,
-                          color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
-                        );
-                      },
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: isDark ? const Color(0xFFF8F9FA) : Colors.white,
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(
+                          color: isDark ? theme.colorScheme.outlineVariant : Colors.black.withValues(alpha: 0.08),
+                        ),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withValues(alpha: isDark ? 0.2 : 0.04),
+                            blurRadius: 4,
+                            offset: const Offset(0, 2),
+                          ),
+                        ],
+                      ),
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(6),
+                        child: Image.asset(
+                          'assets/branding/logo_iriart.png',
+                          height: isDesktop ? 24 : 20,
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            return Icon(
+                              Icons.palette_outlined,
+                              size: isDesktop ? 22 : 18,
+                              color: isDark ? const Color(0xFFE2C2AA) : const Color(0xFF7B5E4B),
+                            );
+                          },
+                        ),
+                      ),
                     ),
                     const SizedBox(width: 8),
                     Flexible(
