@@ -114,6 +114,66 @@ class _VirtualWallStudioState extends State<VirtualWallStudio> {
   VirtualWallColor _selectedWallColor = VirtualWallColor.galleryOffWhite;
   bool _hasPassePartout = true;
 
+  double? _naturalAspectRatio;
+  ImageStream? _imageStream;
+  ImageStreamListener? _imageStreamListener;
+
+  @override
+  void initState() {
+    super.initState();
+    _resolveImageAspectRatio();
+  }
+
+  @override
+  void didUpdateWidget(covariant VirtualWallStudio oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.artwork.imageUrl != widget.artwork.imageUrl) {
+      _naturalAspectRatio = null;
+      _resolveImageAspectRatio();
+    }
+  }
+
+  @override
+  void dispose() {
+    _removeImageStreamListener();
+    super.dispose();
+  }
+
+  void _removeImageStreamListener() {
+    if (_imageStream != null && _imageStreamListener != null) {
+      _imageStream!.removeListener(_imageStreamListener!);
+    }
+    _imageStream = null;
+    _imageStreamListener = null;
+  }
+
+  void _resolveImageAspectRatio() {
+    _removeImageStreamListener();
+    final url = widget.artwork.imageUrl.trim();
+    if (url.isEmpty) return;
+
+    final provider = NetworkImage(url);
+    final stream = provider.resolve(const ImageConfiguration());
+    final listener = ImageStreamListener(
+      (ImageInfo info, bool _) {
+        final w = info.image.width.toDouble();
+        final h = info.image.height.toDouble();
+        if (w > 0 && h > 0 && mounted) {
+          final ratio = w / h;
+          if (_naturalAspectRatio == null ||
+              (_naturalAspectRatio! - ratio).abs() > 0.01) {
+            setState(() => _naturalAspectRatio = ratio);
+          }
+        }
+      },
+      onError: (_, __) {},
+    );
+
+    _imageStream = stream;
+    _imageStreamListener = listener;
+    stream.addListener(listener);
+  }
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context)!;
@@ -126,57 +186,80 @@ class _VirtualWallStudioState extends State<VirtualWallStudio> {
         final roomWidth = constraints.maxWidth;
         final roomHeight = isNarrow ? 250.0 : 330.0;
 
-        // Calculate artwork target dimensions proportionally based on physical height cm
+        // Prefer real loaded image orientation so horizontal/landscape paintings
+        // always get a horizontal frame matching the actual artwork.
         final parsedDim = ArtworkDimensions.parse(widget.artwork.dimensions);
-        final maxHeight = roomHeight * 0.50;
-        final minHeight = roomHeight * 0.22;
+        final effectiveAspectRatio = (_naturalAspectRatio ??
+                parsedDim?.aspectRatio ??
+                1.0)
+            .clamp(0.45, 2.4);
 
-        double targetHeight;
-        double targetWidth;
+        final isLandscape = effectiveAspectRatio > 1.05;
 
-        if (parsedDim != null) {
-          // Map physical height (25cm to 140cm range) proportionally to pixel height
+        // Size artwork cleanly on the wall based on orientation and physical size
+        final baseHeight = isLandscape ? roomHeight * 0.34 : roomHeight * 0.42;
+        double targetHeight = baseHeight;
+        double targetWidth = targetHeight * effectiveAspectRatio;
+
+        if (parsedDim != null && _naturalAspectRatio == null) {
           const minCm = 25.0;
           const maxCm = 140.0;
           final clampedHeightCm = parsedDim.heightCm.clamp(minCm, maxCm);
           final progress =
               ((clampedHeightCm - minCm) / (maxCm - minCm)).clamp(0.0, 1.0);
-
-          targetHeight = minHeight + (maxHeight - minHeight) * progress;
-          targetWidth = targetHeight * parsedDim.aspectRatio;
-
-          // Cap maximum width so it stays neatly framed without overflowing room sides
-          final maxAllowedWidth = math.min(roomWidth * 0.62, roomHeight * 0.56);
-          if (targetWidth > maxAllowedWidth) {
-            final scale = maxAllowedWidth / targetWidth;
-            targetWidth = maxAllowedWidth;
-            targetHeight = targetHeight * scale;
-          }
-        } else {
-          // Fallback if dimensions cannot be parsed
-          targetHeight = roomHeight * 0.38;
-          targetWidth = targetHeight * 0.82;
-          final maxAllowedWidth = math.min(roomWidth * 0.62, roomHeight * 0.56);
-          if (targetWidth > maxAllowedWidth) {
-            final scale = maxAllowedWidth / targetWidth;
-            targetWidth = maxAllowedWidth;
-            targetHeight = targetHeight * scale;
-          }
+          final minH = isLandscape ? roomHeight * 0.24 : roomHeight * 0.26;
+          final maxH = isLandscape ? roomHeight * 0.40 : roomHeight * 0.46;
+          targetHeight = minH + (maxH - minH) * progress;
+          targetWidth = targetHeight * effectiveAspectRatio;
         }
 
-        // Horizontal and vertical centering calculations
-        final leftPos = (roomWidth - targetWidth) / 2;
-        final availableWallHeightAboveShelf = roomHeight - 64.0;
-        final topPos =
-            14.0 + (availableWallHeightAboveShelf - targetHeight) * 0.38;
-        final clampedTopPos = topPos.clamp(10.0, roomHeight * 0.42);
+        // Keep framed artwork inside the wall space and above the console shelf
+        final maxAllowedWidth = roomWidth * (isLandscape ? 0.62 : 0.52);
+        final maxAllowedHeight = roomHeight - 86.0;
+
+        if (targetWidth > maxAllowedWidth) {
+          final scale = maxAllowedWidth / targetWidth;
+          targetWidth = maxAllowedWidth;
+          targetHeight = targetHeight * scale;
+        }
+        if (targetHeight > maxAllowedHeight) {
+          final scale = maxAllowedHeight / targetHeight;
+          targetHeight = maxAllowedHeight;
+          targetWidth = targetWidth * scale;
+        }
+
+        // Frame and inner mat (passe-partout) tightly wrapped around artwork
+        final showMatting =
+            _hasPassePartout && _selectedFrame != VirtualFrameStyle.none;
+
+        final minSide = math.min(targetWidth, targetHeight);
+        final frameThickness = _selectedFrame != VirtualFrameStyle.none
+            ? (minSide * 0.045).clamp(3.0, 7.5)
+            : 0.0;
+
+        final matThickness = showMatting
+            ? (minSide * 0.05).clamp(4.0, 8.5)
+            : 0.0;
+
+        final totalExtra = frameThickness + matThickness;
+
+        final outerWidth = targetWidth + 2 * totalExtra;
+        final outerHeight = targetHeight + 2 * totalExtra;
+
+        final outerLeftPos = (roomWidth - outerWidth) / 2;
+        final availableWallHeightAboveShelf = roomHeight - 66.0;
+        final artworkTopPos =
+            14.0 + (availableWallHeightAboveShelf - targetHeight) * 0.34;
+        final clampedArtworkTopPos =
+            artworkTopPos.clamp(10.0, roomHeight * 0.38);
+        final outerTopPos = clampedArtworkTopPos - totalExtra;
 
         return SingleChildScrollView(
           physics: const BouncingScrollPhysics(),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              // 1. Room Scene Canvas (Single Stack with direct Positioned child to avoid ParentDataWidget errors)
+              // 1. Room Scene Canvas
               Container(
                 height: roomHeight,
                 decoration: BoxDecoration(
@@ -205,19 +288,26 @@ class _VirtualWallStudioState extends State<VirtualWallStudio> {
                         ),
                       ),
 
-                      // Room Furniture (Console Table / Shelf & Plant Silhouette)
+                      // Room Furniture
                       CustomPaint(
                         size: Size(roomWidth, roomHeight),
                         painter: _RoomFurniturePainter(),
                       ),
 
-                      // Framed Artwork (Direct Positioned child of Stack)
+                      // Framed Artwork with orientation-matched frame
                       Positioned(
-                        left: leftPos,
-                        top: clampedTopPos,
-                        width: targetWidth,
-                        height: targetHeight,
-                        child: _buildFramedArtworkBox(targetHeight),
+                        left: outerLeftPos,
+                        top: outerTopPos,
+                        width: outerWidth,
+                        height: outerHeight,
+                        child: Center(
+                          child: _buildFramedArtworkBox(
+                            targetWidth: targetWidth,
+                            targetHeight: targetHeight,
+                            frameThickness: frameThickness,
+                            matThickness: matThickness,
+                          ),
+                        ),
                       ),
 
                       // Dimension Scale Note Badge
@@ -276,7 +366,6 @@ class _VirtualWallStudioState extends State<VirtualWallStudio> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Frame Style Header & Selector (Wraps cleanly on narrow screens)
                     Row(
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
@@ -360,7 +449,6 @@ class _VirtualWallStudioState extends State<VirtualWallStudio> {
                     const Divider(height: 1),
                     const SizedBox(height: 14),
 
-                    // Wall Color Header & Selector (Wraps cleanly on narrow screens)
                     Text(
                       l10n.wallColor,
                       style: theme.textTheme.titleSmall?.copyWith(
@@ -434,12 +522,10 @@ class _VirtualWallStudioState extends State<VirtualWallStudio> {
                       }).toList(),
                     ),
 
-                    // Passe-partout / Inner White Mat Border Toggle (Hidden for unframed canvas)
                     if (_selectedFrame != VirtualFrameStyle.none) ...[
                       const SizedBox(height: 14),
                       const Divider(height: 1),
                       const SizedBox(height: 10),
-
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -484,83 +570,69 @@ class _VirtualWallStudioState extends State<VirtualWallStudio> {
     );
   }
 
-  Widget _buildFramedArtworkBox(double targetHeight) {
-    double frameBorderWidth = 0;
+  Widget _buildFramedArtworkBox({
+    required double targetWidth,
+    required double targetHeight,
+    required double frameThickness,
+    required double matThickness,
+  }) {
     BoxDecoration frameOuterDecoration;
-    EdgeInsets mattingPadding = EdgeInsets.zero;
 
     switch (_selectedFrame) {
       case VirtualFrameStyle.none:
-        frameBorderWidth = 0;
         frameOuterDecoration = BoxDecoration(
+          color: Colors.transparent,
           borderRadius: BorderRadius.circular(1),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.28),
-              blurRadius: 16,
-              spreadRadius: 1,
-              offset: const Offset(0, 10),
-            ),
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.12),
-              blurRadius: 4,
-              offset: const Offset(0, 2),
+              color: Colors.black.withValues(alpha: 0.14),
+              blurRadius: 8,
+              spreadRadius: 0,
+              offset: const Offset(0, 4),
             ),
           ],
         );
-        mattingPadding = EdgeInsets.zero;
         break;
 
       case VirtualFrameStyle.oak:
-        frameBorderWidth = math.max(8.0, targetHeight * 0.06);
         frameOuterDecoration = BoxDecoration(
           color: const Color(0xFF8D623C),
           borderRadius: BorderRadius.circular(2),
           border: Border.all(
             color: const Color(0xFF6B482B),
-            width: 1.5,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.32),
-              blurRadius: 20,
-              spreadRadius: 2,
-              offset: const Offset(0, 12),
-            ),
-          ],
-        );
-        mattingPadding =
-            (_hasPassePartout && _selectedFrame != VirtualFrameStyle.none)
-                ? EdgeInsets.all(math.max(8.0, targetHeight * 0.07))
-                : EdgeInsets.zero;
-        break;
-
-      case VirtualFrameStyle.white:
-        frameBorderWidth = math.max(8.0, targetHeight * 0.06);
-        frameOuterDecoration = BoxDecoration(
-          color: const Color(0xFFFDFDFD),
-          borderRadius: BorderRadius.circular(2),
-          border: Border.all(
-            color: const Color(0xFFE0E0E0),
             width: 1.0,
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.26),
-              blurRadius: 18,
-              spreadRadius: 1,
-              offset: const Offset(0, 10),
+              color: Colors.black.withValues(alpha: 0.16),
+              blurRadius: 10,
+              spreadRadius: 0,
+              offset: const Offset(0, 5),
             ),
           ],
         );
-        mattingPadding =
-            (_hasPassePartout && _selectedFrame != VirtualFrameStyle.none)
-                ? EdgeInsets.all(math.max(8.0, targetHeight * 0.07))
-                : EdgeInsets.zero;
+        break;
+
+      case VirtualFrameStyle.white:
+        frameOuterDecoration = BoxDecoration(
+          color: const Color(0xFFFCFCFA),
+          borderRadius: BorderRadius.circular(2),
+          border: Border.all(
+            color: const Color(0xFFD8D5CE),
+            width: 1.0,
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.14),
+              blurRadius: 9,
+              spreadRadius: 0,
+              offset: const Offset(0, 4),
+            ),
+          ],
+        );
         break;
 
       case VirtualFrameStyle.gold:
-        frameBorderWidth = math.max(8.0, targetHeight * 0.06);
         frameOuterDecoration = BoxDecoration(
           gradient: const LinearGradient(
             begin: Alignment.topLeft,
@@ -578,17 +650,13 @@ class _VirtualWallStudioState extends State<VirtualWallStudio> {
           ),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withValues(alpha: 0.30),
-              blurRadius: 20,
-              spreadRadius: 1,
-              offset: const Offset(0, 12),
+              color: Colors.black.withValues(alpha: 0.16),
+              blurRadius: 10,
+              spreadRadius: 0,
+              offset: const Offset(0, 5),
             ),
           ],
         );
-        mattingPadding =
-            (_hasPassePartout && _selectedFrame != VirtualFrameStyle.none)
-                ? EdgeInsets.all(math.max(8.0, targetHeight * 0.07))
-                : EdgeInsets.zero;
         break;
     }
 
@@ -597,27 +665,22 @@ class _VirtualWallStudioState extends State<VirtualWallStudio> {
 
     return Container(
       decoration: frameOuterDecoration,
-      padding: EdgeInsets.all(frameBorderWidth),
+      padding: EdgeInsets.all(frameThickness),
       child: Container(
         color: showMatting ? const Color(0xFFF9F8F4) : Colors.transparent,
-        padding: mattingPadding,
-        child: Container(
-          decoration: BoxDecoration(
-            boxShadow: showMatting
-                ? [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.18),
-                      blurRadius: 4,
-                      spreadRadius: -1,
-                    ),
-                  ]
-                : null,
-          ),
+        padding: EdgeInsets.all(matThickness),
+        child: SizedBox(
+          width: targetWidth,
+          height: targetHeight,
           child: widget.artwork.imageUrl.isNotEmpty
               ? Image.network(
                   widget.artwork.imageUrl,
-                  fit: BoxFit.cover,
+                  width: targetWidth,
+                  height: targetHeight,
+                  fit: BoxFit.contain,
                   errorBuilder: (context, error, stackTrace) => Container(
+                    width: targetWidth,
+                    height: targetHeight,
                     color: Colors.grey.shade300,
                     child: const Center(
                       child: Icon(Icons.broken_image,
@@ -626,6 +689,8 @@ class _VirtualWallStudioState extends State<VirtualWallStudio> {
                   ),
                 )
               : Container(
+                  width: targetWidth,
+                  height: targetHeight,
                   color: Colors.grey.shade300,
                   child: const Center(
                     child: Icon(Icons.image, color: Colors.grey, size: 24),
@@ -680,7 +745,6 @@ class _WallLightPainter extends CustomPainter {
 
   @override
   void paint(Canvas canvas, Size size) {
-    // Top center light cone
     final lightPaint = Paint()
       ..shader = RadialGradient(
         center: const Alignment(0, -1.0),
@@ -695,7 +759,6 @@ class _WallLightPainter extends CustomPainter {
 
     canvas.drawRect(Rect.fromLTWH(0, 0, size.width, size.height), lightPaint);
 
-    // Subtle floor shadow gradient at bottom
     final shadowPaint = Paint()
       ..shader = LinearGradient(
         begin: Alignment.topCenter,
@@ -726,7 +789,6 @@ class _RoomFurniturePainter extends CustomPainter {
     final tableTopY = size.height - floorHeight - 26.0;
     final tableLeft = (size.width - tableWidth) / 2;
 
-    // 1. Skirting Board / Floor Base
     final floorPaint = Paint()..color = const Color(0xFF3B2F2A);
     canvas.drawRect(
       Rect.fromLTWH(0, size.height - floorHeight, size.width, floorHeight),
@@ -742,7 +804,6 @@ class _RoomFurniturePainter extends CustomPainter {
       skirtingLinePaint,
     );
 
-    // 2. Console Table Shadow on Wall/Floor
     final tableShadow = Paint()
       ..color = Colors.black.withValues(alpha: 0.12)
       ..maskFilter = const MaskFilter.blur(BlurStyle.normal, 8);
@@ -754,7 +815,6 @@ class _RoomFurniturePainter extends CustomPainter {
       tableShadow,
     );
 
-    // 3. Console Table Legs (Minimalist tapered wooden legs)
     final legPaint = Paint()..color = const Color(0xFF5D4331);
     final legPath1 = Path()
       ..moveTo(tableLeft + 16, tableTopY + tableHeight)
@@ -772,7 +832,6 @@ class _RoomFurniturePainter extends CustomPainter {
       ..close();
     canvas.drawPath(legPath2, legPaint);
 
-    // 4. Console Table Surface
     final tableTopPaint = Paint()..color = const Color(0xFF7A5941);
     final tableTopRRect = RRect.fromRectAndRadius(
       Rect.fromLTWH(tableLeft, tableTopY, tableWidth, tableHeight),
@@ -780,7 +839,6 @@ class _RoomFurniturePainter extends CustomPainter {
     );
     canvas.drawRRect(tableTopRRect, tableTopPaint);
 
-    // Table top highlight
     final tableHighlight = Paint()
       ..color = const Color(0xFF9E775C)
       ..strokeWidth = 1.5;
@@ -790,11 +848,9 @@ class _RoomFurniturePainter extends CustomPainter {
       tableHighlight,
     );
 
-    // 5. Minimalist Potted Ceramic Plant Silhouette on Right Side of Console Table
     final plantBaseX = tableLeft + tableWidth - 36;
     final plantBaseY = tableTopY;
 
-    // Ceramic Pot
     final potPaint = Paint()..color = const Color(0xFFDCD6CE);
     final potPath = Path()
       ..moveTo(plantBaseX - 8, plantBaseY)
@@ -804,7 +860,6 @@ class _RoomFurniturePainter extends CustomPainter {
       ..close();
     canvas.drawPath(potPath, potPaint);
 
-    // Plant Stems & Leaves
     final leafPaint = Paint()
       ..color = const Color(0xFF3F5243)
       ..style = PaintingStyle.fill;
@@ -814,7 +869,6 @@ class _RoomFurniturePainter extends CustomPainter {
       ..strokeWidth = 1.8
       ..style = PaintingStyle.stroke;
 
-    // Stem 1 & Leaves
     final stem1 = Path()
       ..moveTo(plantBaseX, plantBaseY - 14)
       ..quadraticBezierTo(
@@ -829,7 +883,6 @@ class _RoomFurniturePainter extends CustomPainter {
       leafPaint,
     );
 
-    // Stem 2 & Leaves
     final stem2 = Path()
       ..moveTo(plantBaseX, plantBaseY - 14)
       ..quadraticBezierTo(
@@ -844,7 +897,6 @@ class _RoomFurniturePainter extends CustomPainter {
       leafPaint,
     );
 
-    // Side Leaf
     canvas.drawOval(
       Rect.fromCenter(
         center: Offset(plantBaseX - 6, plantBaseY - 28),
